@@ -3,8 +3,11 @@ import numpy as np
 
 class Robot:
 
-    def __init__(self, position, ID, type = 0):
-        self._type = type  # Type will be an integer
+    def __init__(self, position, ID, robot_type = 0):
+
+        assert isinstance(position, np.ndarray) == True
+
+        self._type = robot_type  # Type will be an integer
         self._position = position  # X-Y position
         self._ID = ID
 
