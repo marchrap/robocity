@@ -3,9 +3,10 @@ import numpy as np
 
 class Robot:
 
-    def __init__(self, position, type = 0):
+    def __init__(self, position, ID, type = 0):
         self._type = type  # Type will be an integer
         self._position = position  # X-Y position
+        self._ID = ID
 
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0
@@ -120,3 +121,7 @@ class Robot:
     @property
     def weight(self):
         return self._weight
+
+    @property
+    def ID(self):
+        return self._ID
