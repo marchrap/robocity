@@ -3,7 +3,7 @@ import numpy as np
 
 class Robot:
 
-    def __init__(self, type, position):
+    def __init__(self, position, type = 0):
         self._type = type  # Type will be an integer
         self._position = position  # X-Y position
 
