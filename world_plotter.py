@@ -1,18 +1,22 @@
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-#import matplotlib.patches.ConnectionPatch
+from matplotlib.animation import FuncAnimation
+from robot_config import Robot
 
 num_nodes = 10
 nodes = []
+num_robots = 5
+robots = []
+dt = 0.01
 types = ["junction", "hospital", "depot"]
 
 
-class node:
-    def __init__(self, position, nodeType, parents):
-        self._position = position
-        self._type = nodeType
-        self._parents = parents
+class cityNode:
+    def __init__(self, position, nodeType, connections):
+        self.position = position
+        self.nodeType = nodeType
+        self.connections = connections
 
 
 def create_nodes():
@@ -25,35 +29,141 @@ def create_nodes():
         if len(nodes):
             for j in range(np.random.randint(0, len(nodes))):
                 parents.append(np.random.randint(0, len(nodes)))
-        nodes.append(node(position, nodeType, parents))
+        nodes.append(cityNode(position, nodeType, parents))
+
+
+def create_nodes_2():
+    # 0
+    position = np.array([0, 0])
+    nodes.append(cityNode(position, 'depot', [1, 3]))
+
+    # 1
+    position = np.array([0, 1])
+    nodes.append(cityNode(position, 'junction', [0, 2, 4]))
+    # 2
+    position = np.array([0, 2])
+    nodes.append(cityNode(position, 'junction', [0, 1, 5]))
+    # 3
+    position = np.array([1, 0])
+    nodes.append(cityNode(position, 'junction', [0, 4, 6]))
+    # 4
+    position = np.array([1, 1])
+    nodes.append(cityNode(position, 'junction', [1, 3, 5, 7]))
+    # 5
+    position = np.array([1, 2])
+    nodes.append(cityNode(position, 'junction', [2, 4, 8]))
+    # 6
+    position = np.array([2, 0])
+    nodes.append(cityNode(position, 'junction', [3, 7]))
+    # 7
+    position = np.array([2, 1])
+    nodes.append(cityNode(position, 'junction', [4, 6, 8]))
+
+    # 8
+    position = np.array([2, 2])
+    nodes.append(cityNode(position, 'hospital', [5, 7]))
 
 
 def init_plot():
     fig = plt.figure()
-    ax = plt.axes(xlim=(-2, 2), ylim=(-2, 2))
-
-
-def plot_nodes():
-    fig = plt.figure()
-    ax = plt.axes(xlim=(-2, 2), ylim=(-2, 2))
+    ax = plt.axes()  # xlim=(-2, 2), ylim=(-2, 2))
     ax.set_aspect('equal')
+    return fig, ax
+
+
+def plot_nodes(ax):
+    '''fig = plt.figure()
+    ax = plt.axes()  # xlim=(-2, 2), ylim=(-2, 2))
+    ax.set_aspect('equal')'''
 
     for node in nodes:
-        if node._type == "hospital":
-            shape = plt.Circle(node._position, 0.1, color='red')
-        if node._type == "depot":
-            shape = plt.Circle(node._position, 0.1, color='blue')
-        if node._type == "junction":
-            shape = plt.Rectangle(node._position - 0.05, 0.05, 0.05, color='black')
+        if node.nodeType == "hospital":
+            shape = plt.Circle(node.position, 0.1, color='red')
+        if node.nodeType == "depot":
+            shape = plt.Circle(node.position, 0.1, color='blue')
+        if node.nodeType == "junction":
+            shape = plt.Rectangle(node.position - 0.05 / 2, 0.05, 0.05, color='black')
         ax.add_patch(shape)
-        for parent in node._parents:
-            x = [node._position[0], nodes[parent]._position[0]]
-            y = [node._position[1], nodes[parent]._position[1]]
-            ax.plot(x, y)
+        for connection in node.connections:
+            x = [node.position[0], nodes[connection].position[0]]
+            y = [node.position[1], nodes[connection].position[1]]
+            ax.plot(x, y, c='black')
 
 
+def create_path(robot):
+    position_list = []
+    path_nodes = robot.path_of_node_integers
+    speed = robot.speed
 
-create_nodes()
-# init_plot()
-plot_nodes()
+    for i in range(len(path_nodes) - 1):
+        # print("i: ", i)
+        start_node = nodes[path_nodes[i]]
+        end_node = nodes[path_nodes[i + 1]]
+        # print("start_node: ", path_nodes[i], start_node.position)
+        # print("end_node: ", path_nodes[i+1], end_node.position)
+
+        difference_vector = end_node.position - start_node.position
+        # print(difference_vector, np.linalg.norm(difference_vector), difference_vector / np.linalg.norm(difference_vector))
+
+        position = start_node.position
+        position_list.append(position)
+
+        t = 0
+        while not np.allclose(position, end_node.position, atol=1e-02):  # and t < 100:
+            # increment position in direction towards target
+            position = position + speed * dt * difference_vector / np.linalg.norm(difference_vector)
+            # print(position)
+            t += dt
+            position_list.append(position)
+        # print(position)
+        # print("t: ", t)
+
+    return position_list
+
+
+def init_robots():
+    for i in range(num_robots):
+        for node in nodes:
+            if node.nodeType == "depot":
+                position = node.position
+                break
+            else:
+                print("no depots!")
+                position = np.zeros(2, dtype=np.float32)
+
+        robot = Robot(position, i)
+
+        # initialise a random path of connected nodes
+        path = []
+        if len(nodes):
+            current_node = 0
+            path.append(current_node)
+            for j in range(10):
+                new_node = np.random.choice(nodes[current_node].connections)
+                path.append(new_node)
+                current_node = new_node
+        print(path)
+        robot._path_of_node_integers = path
+        robots.append(robot)
+
+
+def animate():
+    for robot in robots:
+        path = create_path(robot)
+        print(path)
+        x, y = zip(*path)
+        plt.plot(x, y)
+
+#def update():
+
+
+create_nodes_2()
+fig, ax = init_plot()
+
+init_robots()
+
+plot_nodes(ax)
+#animate(ax)
+ani = FuncAnimation(fig, animate, frames=200, interval=20, blit=True)
+
 plt.show()

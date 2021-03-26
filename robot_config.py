@@ -11,6 +11,9 @@ class Robot:
         self._position = position  # X-Y position
         self._ID = ID
 
+        # added by max
+        self._path_of_node_integers = []
+
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0
         self._life_payload = 0
@@ -128,3 +131,7 @@ class Robot:
     @property
     def ID(self):
         return self._ID
+
+    @property
+    def path_of_node_integers(self):
+        return self._path_of_node_integers
