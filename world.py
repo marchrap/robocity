@@ -14,6 +14,7 @@ class World:
     positions: list
         the list of all the positions of the nodes as tuples (x, y)
     """
+
     def __init__(self, number_of_nodes=7, number_of_warehouses=1, radius=0.5, seed=3):
         """
         Initializer of the function.
@@ -60,7 +61,7 @@ class World:
             pointer['traffic'] = 1
             pointer['capacity'] = np.inf
 
-    def plot(self):
+    def plot(self, show=True):
         """
         Plots a simple representation of the world. The hospitals are marked in blue, the warehouses in green.
         """
@@ -82,12 +83,13 @@ class World:
                 node_colors.append("lightgreen")
 
         # Plot the nodes, edges and labels
-        plt.figure(figsize=(8, 8))
+        #plt.figure(figsize=(8, 8))
         nx.draw_networkx_edges(self.graph, self.positions, alpha=0.4)
         nx.draw_networkx_nodes(self.graph, self.positions, node_color=node_colors)
         nx.draw_networkx_labels(self.graph, self.positions, node_labels)
         nx.draw_networkx_edge_labels(self.graph, self.positions, edge_labels)
-        plt.show()
+        if show == True:
+            plt.show()
 
 
 if __name__ == "__main__":

@@ -40,5 +40,7 @@ if __name__ == "__main__":
     Plot everything
     """
 
-    world.plot()
-    animate_robots(world, robots)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_aspect('equal')
+    world.plot(show=False)
+    animate_robots(world, robots, fig, ax)

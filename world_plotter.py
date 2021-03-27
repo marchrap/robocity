@@ -143,7 +143,7 @@ def init_robots():
                 path.append(new_node)
                 current_node = new_node
         #print(path)
-        robot._path_of_node_integers = path
+        robot._node_path = path
         robots.append(robot)
 
 

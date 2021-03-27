@@ -12,9 +12,9 @@ plot_paths = []
 
 dt = 0.01
 
-fig = plt.figure()
-ax = plt.axes()  # xlim=(-2, 2), ylim=(-2, 2))
-ax.set_aspect('equal')
+#fig = plt.gcf()
+#ax = plt.gca()  # xlim=(-2, 2), ylim=(-2, 2))
+#ax.set_aspect('equal')
 
 def update(i):
     for j in range(len(robot_sprites)):
@@ -29,19 +29,16 @@ def create_path(robot, nodes):
 
     for i in range(len(path_nodes) - 1):
         # print("i: ", i)
-        start_node = nodes[path_nodes[i]]
-        end_node = nodes[path_nodes[i + 1]]
-        # print("start_node: ", path_nodes[i], start_node.position)
-        # print("end_node: ", path_nodes[i+1], end_node.position)
+        start_node = np.array(nodes[path_nodes[i]])
+        end_node = np.array(nodes[path_nodes[i + 1]])
 
-        difference_vector = end_node.position - start_node.position
-        # print(difference_vector, np.linalg.norm(difference_vector), difference_vector / np.linalg.norm(difference_vector))
+        difference_vector = end_node - start_node
 
-        position = start_node.position
+        position = start_node
         position_list.append(position)
 
         t = 0
-        while not np.allclose(position, end_node.position, atol=1e-02):  # and t < 100:
+        while not np.allclose(position, end_node, atol=1e-02):  # and t < 100:
             # increment position in direction towards target
             position = position + speed * dt * difference_vector / np.linalg.norm(difference_vector)
             # print(position)
@@ -52,22 +49,27 @@ def create_path(robot, nodes):
 
     return position_list
 
-def animate_robots(world, robots):
+def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     """
     Parameters
     ----------
     world: World object.
 
     robots: list of Robot objects.
+
+    fig: existing figure
+
+    ax: existing axes
     """
 
     nodes = world.positions
+    print(nodes)
 
     for robot in robots:
-        path = create_path(robot)
+        path = create_path(robot, nodes)
         plot_paths.append(path)
     for robot in robots:
-        robot_sprites.append(plt.Circle((0, 0), 0.1, color='lightblue'))
+        robot_sprites.append(plt.Circle((0, 0), 0.025, color='firebrick'))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
