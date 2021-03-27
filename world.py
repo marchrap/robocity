@@ -33,6 +33,7 @@ class World:
         """
         # Get graph and positions
         self.graph = nx.random_geometric_graph(number_of_nodes, radius, seed=seed)
+        # Dictionary
         self.positions = nx.get_node_attributes(self.graph, "pos")
 
         # Generate random warehouses

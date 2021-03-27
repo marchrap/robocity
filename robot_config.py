@@ -133,5 +133,6 @@ class Robot:
         return self._ID
 
     @property
+    # list of integers to move through through the world.positions list in order.
     def path_of_node_integers(self):
         return self._path_of_node_integers
