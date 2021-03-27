@@ -41,14 +41,18 @@ class World:
         np.random.seed(seed)
         random_warehouse_locations = np.random.choice(self.graph.nodes, number_of_warehouses, replace=False)
 
+        self.warehouses = list(random_warehouse_locations)
+        self.hospitals = []
+
         # Label all the nodes
         for node in self.graph.nodes:
             pointer = self.graph.nodes[node]
             if node != random_warehouse_locations:
                 pointer['type'] = 0
-                pointer['demand1'] = np.random.randint(5)
-                pointer['demand2'] = np.random.randint(5)
+                pointer['demand1'] = np.random.randint(1)       # Going to change this to between 0 and 1 for now
+                pointer['demand2'] = np.random.randint(1)
                 pointer['priority'] = np.random.randint(3)
+                self.hospitals.append(node)
             else:
                 pointer['type'] = 1
 
