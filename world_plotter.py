@@ -92,7 +92,7 @@ def plot_nodes(ax):
 
 def create_path(robot):
     position_list = []
-    path_nodes = robot.path_of_node_integers
+    path_nodes = robot.node_path
     speed = robot.speed
 
     for i in range(len(path_nodes) - 1):
@@ -142,28 +142,44 @@ def init_robots():
                 new_node = np.random.choice(nodes[current_node].connections)
                 path.append(new_node)
                 current_node = new_node
-        print(path)
+        #print(path)
         robot._path_of_node_integers = path
         robots.append(robot)
 
 
-def animate():
+def init_robot_paths():
+    plot_paths = []
     for robot in robots:
         path = create_path(robot)
-        print(path)
-        x, y = zip(*path)
-        plt.plot(x, y)
+        plot_paths.append(path)
+    return plot_paths
 
-#def update():
+def update(i):
+    #print(path)
+    #circle4 = plt.Circle(path[i], 0.1, color='blue')
+    for j in range(len(robot_sprites)):
+        robot_sprites[j].center = plot_paths[j][i]
+        print("i: %d, j: %d" % (i, j))
+        print("point: ", plot_paths[j][i])
 
 
 create_nodes_2()
-fig, ax = init_plot()
-
 init_robots()
+plot_paths = init_robot_paths()
+
+fig, ax, = init_plot()
+
+circle4 = plt.Circle((0,0), 0.1, color='blue')
+ax.add_patch(circle4)
+
+robot_sprites = []
+for robot in robots:
+    robot_sprites.append(plt.Circle((0,0), 0.1, color='lightblue'))
+for sprite in robot_sprites:
+    ax.add_patch(sprite)
 
 plot_nodes(ax)
 #animate(ax)
-ani = FuncAnimation(fig, animate, frames=200, interval=20, blit=True)
+ani = FuncAnimation(fig, update, frames=999, interval=20, blit=False)
 
 plt.show()

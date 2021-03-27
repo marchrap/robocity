@@ -15,4 +15,4 @@ def routing_alorithm(world, robots):
 
     for robot in robots:
         # dummy fill in for demonstration, this is just all nodes in order.
-        robot.path_of_node_integers = list(world.positions.keys())
+        robot.node_path = list(world.positions.keys())

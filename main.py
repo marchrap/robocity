@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+
+number_of_robots = 10
+
 if __name__ == "__main__":
     # Run a test
     world = World()
@@ -19,8 +22,23 @@ if __name__ == "__main__":
 
     print(factory_pos)
 
+    """
+    Initialise some robots
+    """
+
     robots = []
-    for i in range(10):
+    for i in range(number_of_robots):
         robots.append(Robot(factory_pos, i))
 
+    """
+    Give them directions
+    """
+
+    routing_alorithm(world, robots)
+
+    """
+    Plot everything
+    """
+
+    world.plot()
     animate_robots(world, robots)

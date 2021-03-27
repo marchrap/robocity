@@ -12,7 +12,8 @@ class Robot:
         self._ID = ID
 
         # added by max
-        self._path_of_node_integers = []
+        self._node_path = []
+        self._node_instructions = {}
 
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0
@@ -134,5 +135,10 @@ class Robot:
 
     @property
     # list of integers to move through through the world.positions list in order.
-    def path_of_node_integers(self):
-        return self._path_of_node_integers
+    def node_path(self):
+        return self._node_path
+
+    @property
+    # dictionary of integers and instructions
+    def node_instructions(self):
+        return self._node_instructions
