@@ -1,6 +1,6 @@
 from world import World
 from robot_config import Robot
-from routing_algorithm import routing_alorithm
+from routing_algorithm import routing_algorithm
 from animate_robots import animate_robots
 
 import matplotlib.pyplot as plt
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         if world.graph.nodes[node]['type'] == 0:
             factory_pos = np.array(world.graph.nodes[node]['pos'])
 
-    print(factory_pos)
+    #print(factory_pos)
 
     """
     Initialise some robots
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     Give them directions
     """
 
-    routing_alorithm(world, robots)
+    routing_algorithm(world, robots)
 
     """
     Plot everything

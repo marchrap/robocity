@@ -12,10 +12,6 @@ plot_paths = []
 
 dt = 0.01
 
-#fig = plt.gcf()
-#ax = plt.gca()  # xlim=(-2, 2), ylim=(-2, 2))
-#ax.set_aspect('equal')
-
 def update(i):
     for j in range(len(robot_sprites)):
         robot_sprites[j].center = plot_paths[j][i]
@@ -63,15 +59,17 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     """
 
     nodes = world.positions
-    print(nodes)
 
     for robot in robots:
         path = create_path(robot, nodes)
         plot_paths.append(path)
     for robot in robots:
-        robot_sprites.append(plt.Circle((0, 0), 0.025, color='firebrick'))
+        robot_sprites.append(plt.Circle((0, 0), 0.01, color='firebrick', zorder=3))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
+
+    print(robot_sprites)
+    print(plot_paths)
 
     ani = FuncAnimation(fig, update, frames=999, interval=20, blit=False)
 
