@@ -16,7 +16,7 @@ def update(i):
     for j in range(len(robot_sprites)):
         robot_sprites[j].center = plot_paths[j][i]
         print("i: %d, j: %d" % (i, j))
-        print("point: ", plot_paths[j][i])
+        #print("point: ", plot_paths[j][i])
 
 def create_path(robot, nodes):
     position_list = []
@@ -63,7 +63,6 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     for robot in robots:
         path = create_path(robot, nodes)
         plot_paths.append(path)
-    for robot in robots:
         robot_sprites.append(plt.Circle((0, 0), 0.01, color='firebrick', zorder=3))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
@@ -71,6 +70,7 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     print(robot_sprites)
     print(plot_paths)
 
-    ani = FuncAnimation(fig, update, frames=999, interval=20, blit=False)
+    ani = FuncAnimation(fig, update, frames=240, interval=20, blit=False)
 
-    plt.show()
+    return ani
+    #plt.show()

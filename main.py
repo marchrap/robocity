@@ -34,13 +34,16 @@ if __name__ == "__main__":
     Give them directions
     """
 
-    routing_algorithm(world, robots)
+    routing_algorithm(world, robots, mode="random")
 
     """
-    Plot everything
+    Plot everything and save animation
     """
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_aspect('equal')
     world.plot(show=False)
-    animate_robots(world, robots, fig, ax)
+    ani = animate_robots(world, robots, fig, ax)
+    ani.save("animation.gif")
+    plt.show()
+
