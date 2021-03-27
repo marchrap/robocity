@@ -14,6 +14,7 @@ class Robot:
         # added by max
         self._node_path = []
         self._node_instructions = {}
+        self._start_node = 0
 
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0
@@ -142,3 +143,8 @@ class Robot:
     # dictionary of integers and instructions
     def node_instructions(self):
         return self._node_instructions
+
+    @property
+    # dictionary of integers and instructions
+    def start_node(self):
+        return self._start_node

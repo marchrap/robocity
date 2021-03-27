@@ -8,7 +8,7 @@ import networkx as nx
 import numpy as np
 
 
-number_of_robots = 10
+number_of_robots = 4
 
 if __name__ == "__main__":
     # Run a test
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     Give them directions
     """
 
-    routing_algorithm(world, robots, mode="random")
+    routing_algorithm(world, robots, mode="hungarian")
 
     """
     Plot everything and save animation
@@ -44,6 +44,6 @@ if __name__ == "__main__":
     ax.set_aspect('equal')
     world.plot(show=False)
     ani = animate_robots(world, robots, fig, ax)
-    ani.save("animation.gif")
+    #ani.save("animation.gif")
     plt.show()
 
