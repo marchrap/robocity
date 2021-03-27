@@ -3,7 +3,7 @@ import numpy as np
 
 class Robot:
 
-    def __init__(self, position, ID, robot_type = 0):
+    def __init__(self, position, ID, robot_type=0):
 
         assert isinstance(position, np.ndarray) == True
 
@@ -22,14 +22,14 @@ class Robot:
         # For each type of robot define capabilities
 
         # Basic type
-        if type == 0:
+        if self._type == 0:
             self._capacity = 10  # Payload capacity
             self._speed = 1  # Speed
             self._fuelcap = 100  # Fuel capacity
             self._fuel = self._fuelcap  # Set initial fuel as a full tank
             self._weight = 10
 
-        elif type == 1:
+        elif self._type == 1:
             self._capacity = 10  # Payload capacity
             self._speed = 1  # Speed
             self._fuelcap = 100  # Fuel capacity
