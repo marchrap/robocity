@@ -35,13 +35,13 @@ if __name__ == "__main__":
     print("\n\t Robots assigned.")
 
     # Invoke the routing algorithm
-    routing_algorithm(world, robots, mode="hungarian")
+    routing_algorithm(world, robots, mode="random")
 
-    # Plot everything and save animation
-    fig, ax = plt.subplots(figsize=(8, 8))
-    #ax.set_aspect('equal')
-    ax.set_facecolor('black')
-    world.plot(ax=ax, show=False)
-    ani = animate_robots(world, robots, fig, ax)
-    # ani.save("animation.gif")
-    plt.show()
+    # # Plot everything and save animation
+    # fig, ax = plt.subplots(figsize=(8, 8))
+    # #ax.set_aspect('equal')
+    # ax.set_facecolor('black')
+    # world.plot(ax=ax, show=False)
+    # ani = animate_robots(world, robots, fig, ax)
+    # # ani.save("animation.gif")
+    # plt.show()

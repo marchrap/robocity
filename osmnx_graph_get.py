@@ -11,7 +11,7 @@ if map_location == "Cambridge":
 
     graph = ox.get_undirected(ox.graph_from_address('Cambridge, United Kingdom', network_type="drive_service"))
 
-    ox.io.save_graphml(graph, filepath=filepath)
+    ox.save_graphml(graph, filepath=filepath)
 
 elif map_location == "Sydney":
 
@@ -19,4 +19,4 @@ elif map_location == "Sydney":
 
     graph = ox.get_undirected(ox.graph_from_address('Sydney, Australia', network_type="drive_service"))
 
-    ox.io.save_graphml(graph, filepath=filepath)
+    ox.save_graphml(graph, filepath=filepath)

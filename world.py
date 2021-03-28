@@ -29,9 +29,10 @@ class World:
         """
         # Get graph and positions
         filepath = pathlib.Path(__file__).parent.absolute() / "Cambridge_Graph.xml"
-        self.graph = ox.io.load_graphml(filepath)
-        ox.add_edge_speeds(self.graph)
-        ox.add_edge_travel_times(self.graph)
+        self.graph = ox.load_graphml(filepath)
+        self.graph = ox.add_edge_speeds(self.graph)
+        self.graph_type1 = ox.add_edge_travel_times(self.graph)
+        self.graph_type2 = ox.add_edge_travel_times(self.graph)
 
         # Generate random warehouses
         np.random.seed(seed)
