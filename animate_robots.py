@@ -43,7 +43,7 @@ def create_path(robot, world):
         position_list.append(position)
 
         t = 0
-        while not np.allclose(position, end_node, atol=1e-02):  # and t < 100:
+        while not np.allclose(position, end_node, atol=1e-03):  # and t < 100:
             # increment position in direction towards target
             position = position + speed * dt * difference_vector / np.linalg.norm(difference_vector)
             # print(position)
@@ -79,14 +79,17 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
         b = np.random.random()
         g = np.random.random()
         colour = (r, g, b)
-        robot_sprites.append(plt.Circle(origin, 15, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
+        robot_sprites.append(plt.Circle(origin, 0.0001, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
     print(robot_sprites)
     print(plot_paths)
 
-    ani = FuncAnimation(fig, update, frames=240, interval=20, blit=False)
+    max_route_len = max([len(x) for x in plot_paths])
+    print(f'Max number of nodes in a route : {max_route_len}')
+
+    ani = FuncAnimation(fig, update, frames=max_route_len, interval=20, blit=False)
 
     return ani
     #plt.show()

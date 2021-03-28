@@ -29,7 +29,7 @@ class World:
         """
         # Get graph and positions
         filepath = pathlib.Path(__file__).parent.absolute() / "Cambridge_Graph.xml"
-        self.graph = ox.project_graph(ox.load_graphml(filepath), to_crs="EPSG:3395")
+        #self.graph = ox.project_graph(ox.load_graphml(filepath), to_crs="EPSG:3395")
         self.graph = ox.add_edge_speeds(self.graph)
         self.graph_type1 = ox.add_edge_travel_times(self.graph)
         self.graph_type2 = ox.add_edge_travel_times(self.graph)
@@ -64,6 +64,7 @@ class World:
         for edge in self.graph.edges:
             pointer = self.graph.edges[edge]
             pointer['travel_time'] *= 1.0
+
 
     def plot(self, ax, show=True):
         """
