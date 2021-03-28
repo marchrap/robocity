@@ -13,10 +13,16 @@ plot_paths = []
 dt = 0.001
 
 def update(i):
-    for j in range(len(robot_sprites)):
-        robot_sprites[j].center = plot_paths[j][i]
-        print("i: %d, j: %d" % (i, j))
-        #print("point: ", plot_paths[j][i])
+    try:
+        for j in range(len(robot_sprites)):
+            try:
+                robot_sprites[j].center = plot_paths[j][i]
+                print("i: %d, j: %d" % (i, j))
+            except:
+                continue
+    except:
+        pass
+
 
 def create_path(robot, world):
     position_list = []
@@ -64,10 +70,16 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     for robot in robots:
         path = create_path(robot, world)
         plot_paths.append(path)
-        if robot._type == 0:
-            robot_sprites.append(plt.Circle((0, 0), 0.0001, color='darkcyan', zorder=3))
-        if robot._type == 1:
-            robot_sprites.append(plt.Circle((0, 0), 0.0001, color='cyan', zorder=3))
+        start_pointer = world.graph.nodes[robot.start_node]
+        origin = np.array([start_pointer['x'], start_pointer['y']])
+        #if robot._type == 0:
+        #    robot_sprites.append(plt.Circle(origin, 15, color='darkcyan', zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
+        #if robot._type == 1:
+        r = np.random.random()
+        b = np.random.random()
+        g = np.random.random()
+        colour = (r, g, b)
+        robot_sprites.append(plt.Circle(origin, 15, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 

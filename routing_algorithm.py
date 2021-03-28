@@ -30,9 +30,13 @@ def routing_algorithm(world, robots, mode="random"):
             print(random_goal)
             source = ox.get_nearest_node(world.graph, robot.position[::-1])
             print(source)
-            path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
-            #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
-            robot._node_path = path
+            try:
+                path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
+                #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
+                robot._node_path = path
+            except:
+                print("Routing error.")
+                continue
 
     elif mode == "hungarian":
         """ We want a cost matrix of size number_of_robots x no_of_tasks"""
