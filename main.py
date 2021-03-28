@@ -11,15 +11,22 @@ number_of_robots = 4
 
 if __name__ == "__main__":
     # Initialize the world
+    print("\n\t Initialising world...")
     world = World()
 
     # Initialize the robots in random warehouses
     robots = []
+
+    print("\n\t World created. Assigning robots to warehouses...\n")
+
     for i in range(number_of_robots):
         warehouse = np.random.choice(world.warehouses)
         pointer = world.graph.nodes[warehouse]
         position = np.array([pointer['x'], pointer['y']])
         robots.append(Robot(position, i))
+        print("Robot ", i, " to warehouse", warehouse)
+
+    print("\n\t Robots assigned.")
 
     # Invoke the routing algorithm
     routing_algorithm(world, robots, mode="random")

@@ -28,6 +28,7 @@ def routing_algorithm(world, robots, mode="random"):
             random_goal = random.choice(world.hospitals)
             source = ox.get_nearest_node(world.graph, robot.position[::-1])
             path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
+            #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
             robot._node_path = path
 
     elif mode == "hungarian":
