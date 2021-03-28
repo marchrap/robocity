@@ -4,46 +4,30 @@ from routing_algorithm import routing_algorithm
 from animate_robots import animate_robots
 
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 
 
 number_of_robots = 4
 
 if __name__ == "__main__":
-    # Run a test
+    # Initialize the world
     world = World()
-    # world.plot()
-    # print(list(nx.all_pairs_dijkstra(world.graph)))
 
-    for node in world.graph.nodes:
-        if world.graph.nodes[node]['type'] == 0:
-            factory_pos = np.array(world.graph.nodes[node]['pos'])
-
-    #print(factory_pos)
-
-    """
-    Initialise some robots
-    """
-
+    # Initialize the robots in random warehouses
     robots = []
     for i in range(number_of_robots):
-        robots.append(Robot(factory_pos, i))
+        warehouse = np.random.choice(world.warehouses)
+        pointer = world.graph.nodes[warehouse]
+        position = np.array([pointer['x'], pointer['y']])
+        robots.append(Robot(position, i))
 
-    """
-    Give them directions
-    """
+    # Invoke the routing algorithm
+    routing_algorithm(world, robots, mode="random")
 
-    routing_algorithm(world, robots, mode="hungarian")
-
-    """
-    Plot everything and save animation
-    """
-
+    # Plot everything and save animation
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_aspect('equal')
     world.plot(show=False)
     ani = animate_robots(world, robots, fig, ax)
-    #ani.save("animation.gif")
+    # ani.save("animation.gif")
     plt.show()
-

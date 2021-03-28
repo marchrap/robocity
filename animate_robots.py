@@ -18,15 +18,18 @@ def update(i):
         print("i: %d, j: %d" % (i, j))
         #print("point: ", plot_paths[j][i])
 
-def create_path(robot, nodes):
+def create_path(robot, world):
     position_list = []
     path_nodes = robot.node_path
     speed = robot.speed
 
     for i in range(len(path_nodes) - 1):
         # print("i: ", i)
-        start_node = np.array(nodes[path_nodes[i]])
-        end_node = np.array(nodes[path_nodes[i + 1]])
+        start_pointer = world.graph.nodes[path_nodes[i]]
+        end_pointer = world.graph.nodes[path_nodes[i + 1]]
+
+        start_node = np.array([start_pointer['x'], start_pointer['y']])
+        end_node = np.array([end_pointer['x'], end_pointer['y']])
 
         difference_vector = end_node - start_node
 
@@ -42,7 +45,7 @@ def create_path(robot, nodes):
             position_list.append(position)
         # print(position)
         # print("t: ", t)
-
+    print(position_list)
     return position_list
 
 def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
@@ -58,10 +61,8 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     ax: existing axes
     """
 
-    nodes = world.positions
-
     for robot in robots:
-        path = create_path(robot, nodes)
+        path = create_path(robot, world)
         plot_paths.append(path)
         robot_sprites.append(plt.Circle((0, 0), 0.01, color='firebrick', zorder=3))
     for sprite in robot_sprites:

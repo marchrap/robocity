@@ -2,10 +2,11 @@ from numpy import random
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 import networkx as nx
+import osmnx as ox
 
 """
-Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each robot object
-
+Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each
+robot object.
 """
 
 
@@ -13,19 +14,21 @@ def routing_algorithm(world, robots, mode="random"):
     """
     Parameters
     ----------
-    world: World object.
-
-    robots: list of Robot objects.
+    world:  World object
+        world object as defined in world.py
+    robots: list
+        list of Robot objects that will be altered for the animation
+    mode:   str
+        a string that represents the mode we are going to use
     """
 
     if mode == "random":
+        """Assign each robot with a random goal."""
         for robot in robots:
-            random_list = []
-            # dummy paths for demonstration, this is just all nodes in a random order.
-            for i in range(10):
-                random_list.append(random.choice(list(world.positions.keys())))
-            robot._node_path = random_list
-
+            random_goal = random.choice(world.hospitals)
+            source = ox.get_nearest_node(world.graph, robot.position[::-1])
+            path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
+            robot._node_path = path
 
     elif mode == "hungarian":
         """ We want a cost matrix of size number_of_robots x no_of_tasks"""
