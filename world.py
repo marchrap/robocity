@@ -64,7 +64,7 @@ class World:
             pointer = self.graph.edges[edge]
             pointer['travel_time'] *= 1.0
 
-    def plot(self, show=True):
+    def plot(self, ax, show=True):
         """
         Plots a simple representation of the world. The hospitals are marked in blue, the warehouses in green.
         """
@@ -84,7 +84,7 @@ class World:
                 node_colors.append("#00000000")
 
         # Plot the graph
-        ox.plot_graph(self.graph, node_color=node_colors, node_size=80, show=False)
+        ox.plot_graph(self.graph, ax=ax, node_color=node_colors, node_size=80, show=False)
 
         # Plot the text for the hospitals
         for node in self.hospitals:

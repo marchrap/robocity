@@ -24,9 +24,12 @@ def routing_algorithm(world, robots, mode="random"):
 
     if mode == "random":
         """Assign each robot with a random goal."""
+        print(world.hospitals)
         for robot in robots:
             random_goal = random.choice(world.hospitals)
+            print(random_goal)
             source = ox.get_nearest_node(world.graph, robot.position[::-1])
+            print(source)
             path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
             #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
             robot._node_path = path

@@ -10,7 +10,7 @@ Takes world and robots, plots the world, then plots animations of robots path_of
 robot_sprites = []
 plot_paths = []
 
-dt = 0.01
+dt = 0.001
 
 def update(i):
     for j in range(len(robot_sprites)):
@@ -64,7 +64,10 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     for robot in robots:
         path = create_path(robot, world)
         plot_paths.append(path)
-        robot_sprites.append(plt.Circle((0, 0), 0.01, color='firebrick', zorder=3))
+        if robot._type == 0:
+            robot_sprites.append(plt.Circle((0, 0), 0.0001, color='darkcyan', zorder=3))
+        if robot._type == 1:
+            robot_sprites.append(plt.Circle((0, 0), 0.0001, color='cyan', zorder=3))
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
