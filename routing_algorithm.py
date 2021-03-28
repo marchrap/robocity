@@ -70,7 +70,6 @@ def routing_algorithm(world, robots, mode="random"):
         # We also have a cost matrix of the correct size, now we fill it in with the time cost
 
         for i, robot in enumerate(robots):
-
             for j, task in enumerate(tasks):
                 path_length = nx.shortest_path_length(world.graph, robot.start_node, task[0], weight='length')
 
@@ -86,13 +85,15 @@ def routing_algorithm(world, robots, mode="random"):
 
         robot_ind, task_ind = linear_sum_assignment(cost_matrix)
 
+        print(robot_ind)
+
         for i, index in enumerate(robot_ind):
             robots[index]._node_path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
                                                         weight='length')
 
         assignment_cost = cost_matrix[robot_ind, task_ind].sum()
 
-        print("Assignment cost: ", assignment_cost)
+        print("Total flowtime: ", assignment_cost)
 
         # need to add second round / many more rounds of task allocation for remaining tasks
 
