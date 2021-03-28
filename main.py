@@ -23,25 +23,26 @@ if __name__ == "__main__":
         warehouse = np.random.choice(world.warehouses)
         pointer = world.graph.nodes[warehouse]
         position = np.array([pointer['x'], pointer['y']])
-        if i > 3:
+        if i > 2:
             robot_type = 1
         else:
             robot_type = 0
         robot = Robot(position, i, robot_type=robot_type)
         robot._start_node = warehouse
         robots.append(robot)
-        print("Robot ", i, " to warehouse", warehouse)
+        print("Robot", i, "assigned to warehouse", warehouse)
 
     print("\n\t Robots assigned.")
 
     # Invoke the routing algorithm
     routing_algorithm(world, robots, mode="random")
 
-    # # Plot everything and save animation
-    # fig, ax = plt.subplots(figsize=(8, 8))
-    # #ax.set_aspect('equal')
-    # ax.set_facecolor('black')
-    # world.plot(ax=ax, show=False)
-    # ani = animate_robots(world, robots, fig, ax)
-    # # ani.save("animation.gif")
-    # plt.show()
+    # Plot everything and save animation
+    fig, ax = plt.subplots(figsize=(8, 8))
+    #ax.set_aspect('equal')
+    ax.set_facecolor('black')
+    world.plot(ax=ax, show=False)
+    ani = animate_robots(world, robots, fig, ax)
+    # ani.save("animation.gif")
+    ax.legend()
+    plt.show()
