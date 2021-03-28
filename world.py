@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 import numpy as np
+import pathlib
 
 
 class World:
@@ -27,7 +28,8 @@ class World:
             the random seed used to generate the world
         """
         # Get graph and positions
-        self.graph = ox.get_undirected(ox.graph_from_address('Cambridge, United Kingdom', network_type="drive_service"))
+        filepath = pathlib.Path(__file__).parent.absolute() / "Cambridge_Graph.xml"
+        self.graph = ox.io.load_graphml(filepath)
         ox.add_edge_speeds(self.graph)
         ox.add_edge_travel_times(self.graph)
 
