@@ -31,7 +31,7 @@ def routing_algorithm(world, robots, mode="random"):
             source = ox.get_nearest_node(world.graph, robot.position[::-1])
             print(source)
             try:
-                path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
+                path = nx.astar_path(world.graph, source, random_goal, weight="length")
                 #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
                 robot._node_path = path
             except:
@@ -64,17 +64,23 @@ def routing_algorithm(world, robots, mode="random"):
         for i, robot in enumerate(robots):
             for j, task in enumerate(tasks):
 
+                path_length = nx.shortest_path_length(world.graph, robot.start_node, task[0], weight='length')
+
                 # Calculate time taken to go to that hospital
-                time_taken = robot.speed * nx.astar_path_length(world.graph, robot.start_node, task[0])
+                time_taken = path_length / robot.speed
 
                 cost_matrix[i][j] = time_taken
+
+        print(cost_matrix)
 
         # These may be the wrong way round?
         robot_ind, task_ind = linear_sum_assignment(cost_matrix)
 
-        for i in robot_ind:
-            for j in task_ind:
-                robots[i]._node_path = nx.astar_path(world.graph, robots[i].start_node, tasks[j][0], weight='time_taken')
+        for i, index in enumerate(robot_ind):
+            robots[index]._node_path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0], weight='length')
+
+        assignment_cost = cost_matrix[robot_ind, task_ind].sum()
+        print("Assignment cost: ", assignment_cost)
 
         # need to add second round / many more rounds of task allocation for remaining tasks
         # need to add better starting node allocation (currently defaults to 0)

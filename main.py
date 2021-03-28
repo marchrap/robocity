@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("\n\t Robots assigned.")
 
     # Invoke the routing algorithm
-    routing_algorithm(world, robots, mode="random")
+    routing_algorithm(world, robots, mode="hungarian")
 
     # Plot everything and save animation
     fig, ax = plt.subplots(figsize=(8, 8))
