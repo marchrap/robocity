@@ -8,29 +8,36 @@ Takes world and robots, plots the world, then plots animations of robots path_of
 """
 
 robot_sprites = []
+line_sprites = []
 plot_paths = []
 
-dt = 0.001
-
-def update(i):
+def update(i, fig):
     try:
         for j in range(len(robot_sprites)):
             try:
                 robot_sprites[j].center = plot_paths[j][i]
-                print("i: %d, j: %d" % (i, j))
+            except:
+                continue
+        for j in range(len(line_sprites)):
+            try:
+                if plot_paths[j][:i]:
+                    line_sprites[j][0].set_data(*zip(*plot_paths[j][:i]))
             except:
                 continue
     except:
         pass
 
 
-def create_path(robot, world):
+
+def create_path(robot, world, dt):
     position_list = []
     path_nodes = robot.node_path
     speed = robot.speed
 
+    print("Calculating path for robot: ", robot.ID)
+
     for i in range(len(path_nodes) - 1):
-        # print("i: ", i)
+        #print("Calculating path: ", i)
         start_pointer = world.graph.nodes[path_nodes[i]]
         end_pointer = world.graph.nodes[path_nodes[i + 1]]
 
@@ -42,19 +49,22 @@ def create_path(robot, world):
         position = start_node
         position_list.append(position)
 
+        #print(position, end_node)
+
         t = 0
-        while not np.allclose(position, end_node, atol=1e-03):  # and t < 100:
+        while not np.allclose(position, end_node, atol=dt*speed):  # and t < 100:
             # increment position in direction towards target
             position = position + speed * dt * difference_vector / np.linalg.norm(difference_vector)
-            # print(position)
+            #print(position)
+            #print("t: ", t)
             t += dt
             position_list.append(position)
-        # print(position)
-        # print("t: ", t)
-    print(position_list)
+        #print(position)
+        #print("t: ", t)
+    #print(position_list)
     return position_list
 
-def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
+def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca(), dt=1):
     """
     Parameters
     ----------
@@ -68,28 +78,28 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca()):
     """
 
     for robot in robots:
-        path = create_path(robot, world)
+        path = create_path(robot, world, dt)
         plot_paths.append(path)
         start_pointer = world.graph.nodes[robot.start_node]
         origin = np.array([start_pointer['x'], start_pointer['y']])
-        #if robot._type == 0:
-        #    robot_sprites.append(plt.Circle(origin, 15, color='darkcyan', zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
-        #if robot._type == 1:
         r = np.random.random()
         b = np.random.random()
         g = np.random.random()
         colour = (r, g, b)
-        robot_sprites.append(plt.Circle(origin, 0.0001, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
+        robot_sprites.append(plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
+        line_sprites.append(plt.plot([], [], color=colour, alpha=.75))
+        #plt.plot(*zip(*path), color=colour, alpha=.5)
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
-    print(robot_sprites)
-    print(plot_paths)
+    #print(robot_sprites)
+    #print(plot_paths)
+    #print(line_sprites)
 
     max_route_len = max([len(x) for x in plot_paths])
-    print(f'Max number of nodes in a route : {max_route_len}')
+    print(f'Max number of points in a route : {max_route_len}')
 
-    ani = FuncAnimation(fig, update, frames=max_route_len, interval=20, blit=False)
+    ani = FuncAnimation(fig, update, frames=max_route_len, fargs=[fig], interval=20, blit=False)
 
     return ani
     #plt.show()

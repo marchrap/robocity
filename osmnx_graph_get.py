@@ -1,7 +1,7 @@
 import osmnx as ox
 import pathlib
 
-map_location = "Sydney"
+map_location = "Cambridge"
 
 path = pathlib.Path(__file__).parent.absolute()
 
@@ -9,7 +9,7 @@ if map_location == "Cambridge":
 
     filepath = path / "Cambridge_Graph.xml"
 
-    graph = ox.get_undirected(ox.graph_from_address('Cambridge, United Kingdom', network_type="drive_service"))
+    graph = ox.get_undirected(ox.project_graph(ox.graph_from_address('Cambridge, United Kingdom', network_type="drive_service"), to_crs="EPSG:27700"))
 
     ox.save_graphml(graph, filepath=filepath)
 

@@ -26,24 +26,37 @@ def routing_algorithm(world, robots, mode="random"):
 
     if mode == "random":
         """Assign each robot with a random goal."""
-        print(world.hospitals)
+
+        assignment_cost = 0.0
+
+        # print(world.hospitals)
         for robot in robots:
             random_goal = random.choice(world.hospitals)
-            print(random_goal)
-            #source = ox.get_nearest_node(world.graph, robot.position[::-1])
+            # print(random_goal)
+            # source = ox.get_nearest_node(world.graph, robot.position[::-1])
             source = robot.start_node
-            print(source)
-            #try:
-            path = nx.astar_path(world.graph, source, random_goal, weight="travel_time")
-            #path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
-            #reverse_path = path.reverse()
-            reverse_path = path
-            reverse_path.reverse()
-            path.extend(reverse_path)
-            robot._node_path = path
-            #except:
-            #    print("Routing error.")
-            #    continue
+            # print(source)
+            try:
+                path = nx.astar_path(world.graph, source, random_goal, weight='length')
+                # path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
+                end_path = []
+                for i in path:
+                    end_path.append(i)
+                path.reverse()
+                for i in path:
+                    end_path.append(i)
+                robot._node_path = end_path
+
+                path_length = nx.astar_path_length(world.graph, source, random_goal, weight='length')
+
+                assignment_cost += path_length / robot.speed
+
+            except:
+                print("Routing error.")
+                continue
+
+        print("Total flowtime: ", assignment_cost)
+
 
     elif mode == "hungarian":
 
@@ -91,8 +104,15 @@ def routing_algorithm(world, robots, mode="random"):
         print(task_ind)
 
         for i, index in enumerate(robot_ind):
-            robots[index]._node_path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
+            path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
                                                         weight='length')
+            end_path = []
+            for i in path:
+                end_path.append(i)
+            path.reverse()
+            for i in path:
+                end_path.append(i)
+            robots[index]._node_path = end_path
 
         assignment_cost = cost_matrix[robot_ind, task_ind].sum()
 
@@ -104,7 +124,6 @@ def routing_algorithm(world, robots, mode="random"):
 
     elif mode == "marcin's magic method":
         # Obtain all the demand and priority for goods 1 and 2
-        t = time.time()
         demand = []
         tasks = []
         priority = []
@@ -151,5 +170,6 @@ def routing_algorithm(world, robots, mode="random"):
             task = tasks[nonzero[1][index]]
             robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
             cost += T[nonzero[0][index]][nonzero[1][index]]
-        print(time.time() - t)
-        # print("Total flowtime: ", cost)
+
+        return cost
+
