@@ -52,7 +52,7 @@ class World:
                 pointer['type'] = 0
                 pointer['demand1'] = np.random.randint(2)       # Going to change this to between 0 and 1 for now
                 pointer['demand2'] = np.random.randint(2)
-                pointer['priority'] = np.random.randint(3)
+                pointer['priority'] = np.random.randint(1, 3)
             elif node in random_warehouse_locations:
                 # Warehouses
                 pointer['type'] = 1
@@ -64,7 +64,6 @@ class World:
         for edge in self.graph.edges:
             pointer = self.graph.edges[edge]
             pointer['travel_time'] *= 1.0
-
 
     def plot(self, ax, show=True):
         """

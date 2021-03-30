@@ -3,13 +3,15 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 import networkx as nx
 import osmnx as ox
+import time
+import cvxpy as cp
 
 """
 Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each
 robot object.
 """
 
-
+# TODO change the timing so that traffic and speed limits are taken into account
 def routing_algorithm(world, robots, mode="random"):
     """
     Parameters
@@ -86,6 +88,7 @@ def routing_algorithm(world, robots, mode="random"):
         robot_ind, task_ind = linear_sum_assignment(cost_matrix)
 
         print(robot_ind)
+        print(task_ind)
 
         for i, index in enumerate(robot_ind):
             robots[index]._node_path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
@@ -100,4 +103,53 @@ def routing_algorithm(world, robots, mode="random"):
         # need to add better starting node allocation (currently defaults to 0)
 
     elif mode == "marcin's magic method":
-        pass
+        # Obtain all the demand and priority for goods 1 and 2
+        t = time.time()
+        demand = []
+        tasks = []
+        priority = []
+        for i, hospital in enumerate(world.hospitals):
+            if world.graph.nodes[hospital]['demand1'] != 0:
+                demand.append(world.graph.nodes[hospital]['demand1'])
+                tasks.append(hospital)
+                priority.append(world.graph.nodes[hospital]['priority'])
+            if world.graph.nodes[hospital]['demand2'] != 0:
+                demand.append(world.graph.nodes[hospital]['demand2'])
+                tasks.append(hospital)
+                priority.append(world.graph.nodes[hospital]['priority'])
+
+        # Obtain the time cost matrix and the robots' capacity
+        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
+        #   different supplies.
+        T = np.zeros((len(robots), len(demand)))
+        capacity = np.zeros(len(robots))
+        for i, robot in enumerate(robots):
+            capacity[i] = robot.capacity
+            for j, task in enumerate(tasks):
+                path_length = nx.shortest_path_length(world.graph, robot.start_node, task, weight='length')
+                time_taken = path_length / robot.speed
+                T[i][j] = time_taken
+
+        # Change the demand and priority arrays to numpy ones
+        demand = np.array(demand)
+        priority = np.array(priority)*10000
+
+        # Define the optimization problem
+        x = cp.Variable((len(robots), len(demand)), boolean=True)
+        cost = cp.sum(cp.multiply(T, x)) + cp.sum(cp.neg(cp.multiply(cp.matmul(capacity, x) - demand, priority)))
+        objective = cp.Minimize(cost)
+        inequality = [cp.sum(x, axis=1) <= 1]
+        problem = cp.Problem(objective, inequality)
+        problem.solve()
+
+        # Assign the results to the robots and evaluate the costs
+        # print(x.value)
+        nonzero = x.value.nonzero()
+        cost = 0
+        for index in range(len(nonzero[0])):
+            robot = robots[nonzero[0][index]]
+            task = tasks[nonzero[1][index]]
+            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            cost += T[nonzero[0][index]][nonzero[1][index]]
+        print(time.time() - t)
+        # print("Total flowtime: ", cost)
