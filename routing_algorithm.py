@@ -57,7 +57,6 @@ def routing_algorithm(world, robots, mode="random"):
 
         print("Total flowtime: ", assignment_cost)
 
-
     elif mode == "hungarian":
 
         """ We want a cost matrix of size number_of_robots x no_of_tasks"""
@@ -164,12 +163,12 @@ def routing_algorithm(world, robots, mode="random"):
         # Assign the results to the robots and evaluate the costs
         # print(x.value)
         nonzero = x.value.nonzero()
-        cost = 0
+        assignment_cost = 0
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
             robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
-            cost += T[nonzero[0][index]][nonzero[1][index]]
+            assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
-        return cost
+    return assignment_cost
 

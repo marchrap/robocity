@@ -10,7 +10,7 @@ import time
 
 number_of_robots = 4
 
-routing_mode = "random"
+routing_mode = "hungarian"
 
 # time-step for euler integration plotting
 dt = 5
@@ -65,9 +65,8 @@ if __name__ == "__main__":
                  backgroundcolor='white')
     plt.annotate("Flowtime: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
                  backgroundcolor='white')
-    plt.annotate("Computation time: %.2f ms" % computation_time*1000, xy=(0.05, 0.85), xycoords='axes fraction',
+    plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
-
 
     print("\n\t Robots routed with total flowtime of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)
