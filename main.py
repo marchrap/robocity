@@ -10,7 +10,7 @@ import time
 
 number_of_robots = 4
 
-routing_mode = "hungarian"
+routing_mode = "magic2"
 
 # time-step for euler integration plotting
 dt = 5

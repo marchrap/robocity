@@ -51,8 +51,8 @@ class World:
             if node in random_hospital_locations:
                 # Hospitals
                 pointer['type'] = 0
-                pointer['demand1'] = np.random.randint(2)       # Going to change this to between 0 and 1 for now
-                pointer['demand2'] = np.random.randint(2)
+                pointer['demand1'] = np.random.randint(3)       # Going to change this to between 0 and 1 for now
+                pointer['demand2'] = np.random.randint(3)
                 pointer['priority'] = np.random.randint(1, 3)
             elif node in random_warehouse_locations:
                 # Warehouses
