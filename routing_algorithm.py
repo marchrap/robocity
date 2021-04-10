@@ -239,7 +239,7 @@ def routing_algorithm(world, robots, mode="random"):
         #   different supplies.
         T = np.zeros((len(robots), len(demand)))
         capacity = np.zeros((len(robots), 2))
-
+        G = np.zeros((len(demand), len(demand)))
         for i, robot in enumerate(robots):
             capacity[i, 0] = robot.capacity
             capacity[i, 1] = robot.capacity
@@ -247,25 +247,40 @@ def routing_algorithm(world, robots, mode="random"):
                 path_length = nx.shortest_path_length(world.graph, robot.start_node, task, weight='length')
                 time_taken = path_length / robot.speed
                 T[i][j] = time_taken
+                for k, other_task in enumerate(tasks):
+                    if other_task != task:
+                        path_length = nx.shortest_path_length(world.graph, task, other_task, weight='length')
+                        time_taken = path_length / robot.speed
+                        G[j][k] = time_taken / 2
+                    else:
+                        G[j][k] = 100000
+        print(G.shape)
+
 
         # Change the demand and priority arrays to numpy ones
         demand = np.array(demand)
         priority = np.array(priority) * 10000
-
+        print(T)
         # Define the optimization problem
-        x = cp.Variable((len(robots), len(demand) + 2), boolean=True)
-        print(x[:, :len(demand)].shape)
-        zeros = np.zeros((len(demand), len(demand)))
-        zeros2 = np.zeros((2,2))
-        cost = cp.sum(cp.multiply(T, x[:, :len(demand)])) + cp.sum(cp.neg(cp.multiply(
-            cp.matmul(cp.transpose(x[:, :len(demand)]), capacity) - demand, priority)))
+        x = cp.Variable((len(robots), len(demand)), boolean=True)
+        y = cp.Variable((len(robots), len(demand)), boolean=True)
+        w = cp.Variable(len(demand), pos=True)
+        zeros = np.eye(len(demand))/10000
+        total = np.array(np.concatenate((np.concatenate((zeros, G), axis=1), np.concatenate((G, zeros), axis=1))))
+        print(total)
+        c = cp.Variable((len(demand), 2), integer=True)
+        # print(.shape)
+        cost_next = cp.quad_form(cp.transpose(cp.hstack([x[0, :], y[0, :]])), total)
+        cost = cp.sum(cp.multiply(T, x)) + cost_next + cp.sum(cp.norm1(cp.multiply(c - demand, priority)))
         objective = cp.Minimize(cost)
-        inequality = [cp.sum(x, axis=1) <= 1]
+        print(capacity)
+        inequality = [cp.sum(x, axis=1) <= 1, cp.sum(c, axis=2) <= capacity, cp.sum(c, axis=1) <= 1000*cp.vec(x), c >= 0]
         problem = cp.Problem(objective, inequality)
         problem.solve()
 
         # Assign the results to the robots and evaluate the costs
         print(x.value)
+        print(c.value)
         nonzero = x.value.nonzero()
         assignment_cost = 0
 
@@ -274,6 +289,84 @@ def routing_algorithm(world, robots, mode="random"):
             task = tasks[nonzero[1][index]]
             robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
+
+    elif mode == "magic4":
+        # Obtain all the demand and priority for goods 1 and 2
+        demand = []
+        tasks = []
+        priority = []
+
+        for i, hospital in enumerate(world.hospitals):
+            if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
+                pointer = world.graph.nodes[hospital]
+                demand.append([pointer['demand1'], pointer['demand2']])
+                tasks.append(hospital)
+                priority.append([pointer['priority'], pointer['priority']])
+
+        # Obtain the time cost matrix and the robots' capacity
+        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
+        #   different supplies.
+        x = []
+        v = []
+        z = []
+        capacities = []
+        distances = []
+        constraints = []
+        costs = []
+        for i, robot in enumerate(robots):
+            # Create necessary variables
+            x.append(cp.Variable((len(demand) + 1, len(demand) + 1), boolean=True))
+            v.append(cp.Variable(len(demand) + 1, boolean=True))
+            z.append(cp.Variable((len(demand), 1)))
+            capacities.append(cp.Variable((len(demand), 2)))
+
+            # Add constraints
+            constraints.append(cp.sum(x[i], axis=1) == v[i])  # Note if city is moved from
+            constraints.append(cp.sum(x[i], axis=0) == cp.sum(x[i], axis=1))  # Note if city is visited
+            constraints.append(z[i] - cp.transpose(z[i]) + len(demand) * x[i][1:, 1:] <= len(demand) - 1)
+            constraints.append(cp.sum(x[i], axis=1) <= cp.sum(x[i][0, :]))  # We start from 0th node
+            constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
+            constraints.append(cp.sum(capacities[i], axis=1) <= 1000*v[i][1:])  # Check how many units are delivered
+            constraints.append(capacities[i] >= 0)
+
+            # Fill in the distance matrix
+            distances.append(np.zeros((len(demand) + 1, len(demand) + 1)))
+            for j, task in enumerate([robot.start_node] + tasks):
+                for k, other_task in enumerate([robot.start_node] + tasks):
+                    if other_task != task:
+                        path_length = nx.shortest_path_length(world.graph, task, other_task, weight='length')
+                        distances[i][j][k] = path_length / robot.speed
+                    else:
+                        distances[i][j][k] = 100000
+
+            costs.append(cp.sum(cp.multiply(x[i], distances[i])))
+
+        demand = np.array(demand)
+        priority = np.array(priority) * 10000
+
+        costs = cp.sum(cp.hstack(costs)) + cp.sum(cp.multiply(cp.norm1(demand - sum(capacities)), priority))
+        objective = cp.Minimize(costs)
+        problem = cp.Problem(objective, constraints)
+        problem.solve(verbose=True)
+
+        # Assign the results to the robots and evaluate the costs
+        for i, x_i in enumerate(x):
+            print(f"variable {i + 1}: {x_i.value}")
+            print(f"variable {i + 1}: {np.sum(x_i.value * distances[i])}")
+            print(f"variable {i + 1}: {capacities[i].value}")
+        assignment_cost = 0
+
+        # for i in range(len(robots)):
+        #     if x[i][1, :]:
+        #
+        #     for row in x[i]:
+        #
+        #     robot = robots[[0][index]]
+        #     task = tasks[nonzero[1][index]]
+        #     robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+        #     cost += T[nonzero[0][index]][nonzero[1][index]]
+        #     if cost > assignment_cost:
+        #         assignment_cost = cost
 
     return assignment_cost
 
