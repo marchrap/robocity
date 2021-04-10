@@ -1,10 +1,11 @@
 from world import World
 from robot_config import Robot
 from routing_algorithm import routing_algorithm, maxs_attempt_at_robot_return
-from animate_robots import animate_robots
-
+from animate_robots import animate_robots, progress_bar
+import ffmpeg
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib as mpl
 
 import time
 
@@ -13,7 +14,7 @@ number_of_robots = 10
 routing_mode = "magic2"
 
 # time-step for euler integration plotting
-dt = 10
+dt = 2
 
 if __name__ == "__main__":
     # Initialize the world
@@ -69,12 +70,16 @@ if __name__ == "__main__":
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
 
-    print("\n\t Robots routed with makespan of:", assignment_cost)
+    print("\n\t Robots routed with assignment_cost of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)
 
     import time
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    #ani.save("animation%s.gif" % timestr)
+    mpl.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\maxw\\PycharmProjects\\4I15 MRS Robocity\\ffmpeg-4.4' \
+                                            r'-full_build\\bin\\ffmpeg.exe '
+
+    render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
 
     plt.show()
+

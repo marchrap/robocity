@@ -387,6 +387,8 @@ def maxs_attempt_at_robot_return(world, robots, mode="random"):
     #print(visited_hospitals)
     #print(world.hospitals)
 
+    print("Remaining tasks: {}".format(len(world.hospitals)-len(visited_hospitals)))
+
     # remove completed tasks
     for hospital in world.hospitals:
         if hospital in visited_hospitals:
@@ -396,6 +398,7 @@ def maxs_attempt_at_robot_return(world, robots, mode="random"):
             pointer['demand2'] = 0
 
     # reassign robots to incomplete tasks
+
     assignment_cost += routing_algorithm(world, robots, mode=mode)
 
     for robot in robots:

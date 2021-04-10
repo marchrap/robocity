@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from robot_config import Robot
+from progress.bar import IncrementalBar
 
 """
 Takes world and robots, plots the world, then plots animations of robots path_of_node_integers on top.
@@ -10,6 +11,7 @@ Takes world and robots, plots the world, then plots animations of robots path_of
 robot_sprites = []
 line_sprites = []
 plot_paths = []
+
 
 def update(i, fig):
     try:
@@ -28,7 +30,6 @@ def update(i, fig):
         pass
 
 
-
 def create_path(robot, world, dt):
     position_list = []
     path_nodes = robot.node_path
@@ -37,7 +38,7 @@ def create_path(robot, world, dt):
     print("Calculating path for robot: ", robot.ID)
 
     for i in range(len(path_nodes) - 1):
-        #print("Calculating path: ", i)
+        # print("Calculating path: ", i)
         start_pointer = world.graph.nodes[path_nodes[i]]
         end_pointer = world.graph.nodes[path_nodes[i + 1]]
 
@@ -49,22 +50,23 @@ def create_path(robot, world, dt):
         position = start_node
         position_list.append(position)
 
-        #print(position, end_node)
+        # print(position, end_node)
 
         t = 0
-        while not np.allclose(position, end_node, atol=dt*speed):  # and t < 100:
+        while not np.allclose(position, end_node, atol=dt * speed):  # and t < 100:
             # increment position in direction towards target
             position = position + speed * dt * difference_vector / np.linalg.norm(difference_vector)
-            #print(position)
-            #print("t: ", t)
+            # print(position)
+            # print("t: ", t)
             t += dt
             position_list.append(position)
-        #print(position)
-        #print("t: ", t)
-    #print(position_list)
+        # print(position)
+        # print("t: ", t)
+    # print(position_list)
     return position_list
 
-def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca(), dt=1):
+
+def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
     """
     Parameters
     ----------
@@ -86,15 +88,16 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca(), dt=1):
         b = np.random.random()
         g = np.random.random()
         colour = (r, g, b)
-        robot_sprites.append(plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
+        robot_sprites.append(
+            plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
         line_sprites.append(plt.plot([], [], color=colour, alpha=.75))
-        #plt.plot(*zip(*path), color=colour, alpha=.5)
+        # plt.plot(*zip(*path), color=colour, alpha=.5)
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
-    #print(robot_sprites)
-    #print(plot_paths)
-    #print(line_sprites)
+    # print(robot_sprites)
+    # print(plot_paths)
+    # print(line_sprites)
 
     max_route_len = max([len(x) for x in plot_paths])
     print(f'Max number of points in a route : {max_route_len}')
@@ -102,4 +105,23 @@ def animate_robots(world, robots, fig=plt.gcf(),ax=plt.gca(), dt=1):
     ani = FuncAnimation(fig, update, frames=max_route_len, fargs=[fig], interval=20, blit=False)
 
     return ani
-    #plt.show()
+    # plt.show()
+
+#def progress_callback(current_frame, total_frames):
+#    with ShadyBar('Processing', max=total_frames) as bar:
+#        for current_frame in range(total_frames):
+#            # Do some work
+#            bar.next()
+
+
+bar = IncrementalBar('Processing', max=max([len(x) for x in plot_paths]))
+
+
+def progress_bar(current_frame, total_frames):
+    print("Frame {}/{}".format(current_frame+1, total_frames))
+    if current_frame==0:
+        bar = IncrementalBar('Processing', max=total_frames)
+
+
+bar.next()
+    bar.finish()
