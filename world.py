@@ -15,7 +15,7 @@ class World:
         the graph of the whole world
     """
 
-    def __init__(self, number_of_warehouses=1, number_of_hospitals=5, seed=3):
+    def __init__(self, number_of_warehouses=1, number_of_hospitals=15, seed=3):
         """
         Initializer of the function. There are three types of nodes. (0) is a hospital, (1) a warehouse and (2) anything
         else, like cross roads.
@@ -30,7 +30,7 @@ class World:
         # Get graph and positions
         filepath = pathlib.Path(__file__).parent.absolute() / "Cambridge_Graph.xml"
         self.graph = ox.load_graphml(filepath)
-        #self.graph = ox.project_graph(ox.io.load_graphml(filepath), to_crs="EPSG:3395")
+        # self.graph = ox.project_graph(ox.io.load_graphml(filepath), to_crs="EPSG:3395")
         self.graph = ox.add_edge_speeds(self.graph)
         self.graph_type1 = ox.add_edge_travel_times(self.graph)
         self.graph_type2 = ox.add_edge_travel_times(self.graph)
@@ -51,9 +51,13 @@ class World:
             if node in random_hospital_locations:
                 # Hospitals
                 pointer['type'] = 0
-                pointer['demand1'] = np.random.randint(3)       # Going to change this to between 0 and 1 for now
+                pointer['demand1'] = np.random.randint(3)  # Going to change this to between 0 and 1 for now
                 pointer['demand2'] = np.random.randint(3)
                 pointer['priority'] = np.random.randint(1, 3)
+
+                pointer['init_demand1'] = pointer['demand1']
+                pointer['init_demand2'] = pointer['demand2']
+
             elif node in random_warehouse_locations:
                 # Warehouses
                 pointer['type'] = 1
@@ -91,10 +95,15 @@ class World:
         # Plot the text for the hospitals
         for node in self.hospitals:
             pointer = self.graph.nodes[node]
-            plt.text(pointer['x'], pointer['y'], f"  {pointer['demand1']}/{pointer['demand2']}"
-                                                 f"/{pointer['priority']}", color="white")
+            #plt.text(pointer['x'], pointer['y'], f"  {pointer['init_demand1']}/{pointer['init_demand2']}"
+            #                                     f"/{pointer['priority']}", color="white")
 
-        # Show the plot if required
+            print(pointer['x'], pointer['y'] )
+            plt.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",
+                         xy=(pointer['x']+100, pointer['y']-20), color='black',
+                         bbox=dict(facecolor='white', alpha=0.75, edgecolor='white'))
+
+            # Show the plot if required
         if show:
             plt.show()
 

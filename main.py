@@ -1,6 +1,6 @@
 from world import World
 from robot_config import Robot
-from routing_algorithm import routing_algorithm
+from routing_algorithm import routing_algorithm, maxs_attempt_at_robot_return
 from animate_robots import animate_robots
 
 import matplotlib.pyplot as plt
@@ -8,12 +8,12 @@ import numpy as np
 
 import time
 
-number_of_robots = 4
+number_of_robots = 10
 
-routing_mode = "magic4"
+routing_mode = "magic2"
 
 # time-step for euler integration plotting
-dt = 5
+dt = 10
 
 if __name__ == "__main__":
     # Initialize the world
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         warehouse = np.random.choice(world.warehouses)
         pointer = world.graph.nodes[warehouse]
         position = np.array([pointer['x'], pointer['y']])
-        if i > 1:
+        if i > number_of_robots/2 - 1:
             robot_type = 1
         else:
             robot_type = 0
@@ -46,7 +46,8 @@ if __name__ == "__main__":
     # Invoke the routing algorithm
     print("\n\t Routing robots...")
     timer_start = time.time()
-    assignment_cost = routing_algorithm(world, robots, mode=routing_mode)
+    #assignment_cost = routing_algorithm(world, robots, mode=routing_mode)
+    assignment_cost = maxs_attempt_at_robot_return(world, robots, mode=routing_mode)
     timer_end = time.time()
 
     computation_time = timer_end - timer_start
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
 
-    print("\n\t Robots routed with total flowtime of:", assignment_cost)
+    print("\n\t Robots routed with makespan of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)
 
     import time

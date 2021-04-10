@@ -104,13 +104,13 @@ def routing_algorithm(world, robots, mode="random"):
 
         for i, index in enumerate(robot_ind):
             path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
-                                                        weight='length')
+                                    weight='length')
             end_path = []
-            for i in path:
-                end_path.append(i)
+            for j in path:
+                end_path.append(j)
             path.reverse()
-            for i in path:
-                end_path.append(i)
+            for j in path:
+                end_path.append(j)
             robots[index]._node_path = end_path
 
         assignment_cost = cost_matrix[robot_ind, task_ind].sum()
@@ -217,7 +217,7 @@ def routing_algorithm(world, robots, mode="random"):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic3":
@@ -370,3 +370,36 @@ def routing_algorithm(world, robots, mode="random"):
 
     return assignment_cost
 
+
+def maxs_attempt_at_robot_return(world, robots, mode="random"):
+
+    visited_hospitals = []
+
+    # first round of assignment
+    assignment_cost = routing_algorithm(world, robots, mode=mode)
+
+
+    for robot in robots:
+        visited_hospitals.append(robot.node_path[-1])
+        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight = 'length')
+        robot._node_path.extend(return_path)
+
+    #print(visited_hospitals)
+    #print(world.hospitals)
+
+    # remove completed tasks
+    for hospital in world.hospitals:
+        if hospital in visited_hospitals:
+            pointer = world.graph.nodes[hospital]
+            print("Node {} visited, clearing demands.".format(hospital))
+            pointer['demand1'] = 0
+            pointer['demand2'] = 0
+
+    # reassign robots to incomplete tasks
+    assignment_cost += routing_algorithm(world, robots, mode=mode)
+
+    for robot in robots:
+        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight='length')
+        robot._node_path.extend(return_path)
+
+    return assignment_cost

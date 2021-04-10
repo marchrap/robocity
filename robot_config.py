@@ -26,14 +26,14 @@ class Robot:
         # Basic type
         if self._type == 0:
             self._capacity = 10  # Payload capacity
-            self._speed = 4  # Speed
+            self._speed = 1  # Speed
             self._fuelcap = 100  # Fuel capacity
             self._fuel = self._fuelcap  # Set initial fuel as a full tank
             self._weight = 10
 
         elif self._type == 1:
             self._capacity = 5  # Payload capacity
-            self._speed = 12 # Speed
+            self._speed = 3 # Speed
             self._fuelcap = 100  # Fuel capacity
             self._fuel = self._fuelcap  # Set initial fuel as a full tank
             self._weight = 5
@@ -140,11 +140,5 @@ class Robot:
         return self._node_path
 
     @property
-    # dictionary of integers and instructions
-    def node_instructions(self):
-        return self._node_instructions
-
-    @property
-    # dictionary of integers and instructions
     def start_node(self):
         return self._start_node
