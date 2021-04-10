@@ -114,14 +114,8 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
 #            bar.next()
 
 
-bar = IncrementalBar('Processing', max=max([len(x) for x in plot_paths]))
+#bar = IncrementalBar('Processing', max=max([len(x) for x in plot_paths]))
 
 
 def progress_bar(current_frame, total_frames):
     print("Frame {}/{}".format(current_frame+1, total_frames))
-    if current_frame==0:
-        bar = IncrementalBar('Processing', max=total_frames)
-
-
-bar.next()
-    bar.finish()
