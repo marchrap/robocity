@@ -11,7 +11,7 @@ import time
 
 number_of_robots = 10
 
-routing_mode = "random"
+routing_mode = "magic2"
 
 # time-step for euler integration plotting
 dt = 20
