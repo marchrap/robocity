@@ -344,10 +344,10 @@ def routing_algorithm(world, robots, mode="random"):
         demand = np.array(demand)
         priority = np.array(priority) * 10000
 
-        costs = cp.sum(cp.hstack(costs)) + cp.sum(cp.multiply(cp.norm1(demand - sum(capacities)), priority))
+        costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True)
+        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=60, allowablePercentageGap=10)
 
         # Assign the results to the robots and evaluate the costs
         for i, x_i in enumerate(x):
@@ -367,6 +367,94 @@ def routing_algorithm(world, robots, mode="random"):
         #     cost += T[nonzero[0][index]][nonzero[1][index]]
         #     if cost > assignment_cost:
         #         assignment_cost = cost
+
+    elif mode == "magic5":
+        # Obtain all the demand and priority for goods 1 and 2
+        demand = []
+        tasks = []
+        priority = []
+        N = 2
+
+        for i, hospital in enumerate(world.hospitals):
+            if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
+                pointer = world.graph.nodes[hospital]
+                demand.append([pointer['demand1'], pointer['demand2']])
+                tasks.append(hospital)
+                priority.append([pointer['priority'], pointer['priority']])
+
+        # Obtain the time cost matrix and the robots' capacity
+        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
+        #   different supplies.
+        x = [[] for _ in range(len(robots))]
+        capacities = []
+        distances = []
+        constraints = []
+        costs = []
+
+        for i, robot in enumerate(robots):
+            # Obtain the time matrix for the robot
+            time_matrix = np.zeros((len(demand), len(demand)))
+            original = np.zeros(len(demand))
+            for j, task in enumerate(tasks):
+                path_length = nx.shortest_path_length(world.graph, robot.start_node, task, weight='length')
+                original[j] = path_length / robot.speed
+
+                for k, other_task in enumerate(tasks):
+                    if other_task != task:
+                        path_length = nx.shortest_path_length(world.graph, task, other_task, weight='length')
+                        time_matrix[j][k] = path_length / robot.speed
+                    else:
+                        time_matrix[j][k] = 0
+
+            # Add the initial state
+            x[i].append(cp.Variable((len(demand), 1), boolean=True))
+            constraints.append(cp.sum(x[i][0]) <= 1)
+            costs.append(cp.sum(cp.multiply(cp.vec(x[i][0]), original)))
+            capacities.append(cp.Variable((len(demand), 2), integer=True))
+
+            # Loop over the other future states
+            for n in range(1, N):
+                x[i].append(cp.Variable((len(demand), 1), boolean=True))
+                costs.append(cp.sum(cp.multiply(cp.pos(x[i][n - 1] + cp.transpose(x[i][n]) - 1), time_matrix)))
+                constraints.append(cp.sum(x[i][n]) == cp.sum(x[i][0]))
+            # constraints.append(cp.vec(sum(x[i])) <= [1] * (len(demand) + 1))
+
+            # Add the capacities constraints
+            #constraints.append(capacities[i] == cp.hstack([robot.capacity*sum(x[i])[1:], robot.capacity*sum(x[i])[1:]]))
+            constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
+            constraints.append(cp.sum(capacities[i], axis=1) <= 1000*cp.vec(sum(x[i])))
+            constraints.append(capacities[i] >= 0)
+
+        demand = np.array(demand)
+        priority = np.array(priority) * 10000
+
+        costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
+        objective = cp.Minimize(costs)
+        problem = cp.Problem(objective, constraints)
+        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=60, allowablePercentageGap=5)
+
+        # Assign the results to the robots and evaluate the costs
+        for robot_i, robot in enumerate(x):
+            print(f"ROBOT {robot_i}\n-------")
+            print(f"delivered capacities: \n{capacities[robot_i].value}")
+            print(f"step 0: {0}")
+            for i, x_i in enumerate(robot):
+                print(f"step {i + 1}: {x_i.value.T}")
+
+        assignment_cost = 0
+        for i, robot in enumerate(robots):
+            robot._current_node = robot.start_node
+            cost = 0
+            for j, x_i in enumerate(x[i]):
+                index = np.argmax(x_i.value)
+                if np.any(capacities[i].value[index] != 0):
+                    task = tasks[index]
+                    distance, path = nx.single_source_dijkstra(world.graph, robot._current_node, task, weight='length')
+                    robot._node_path += path
+                    cost += distance / robot.speed
+                    robot._current_node = task
+            if cost > assignment_cost:
+                assignment_cost = cost
 
     return assignment_cost
 

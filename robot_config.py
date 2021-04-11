@@ -16,6 +16,9 @@ class Robot:
         self._node_instructions = {}
         self._start_node = 0
 
+        # by Marcin
+        self._current_node = 0
+
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0
         self._life_payload = 0

@@ -8,9 +8,9 @@ import numpy as np
 
 import time
 
-number_of_robots = 4
+number_of_robots = 10
 
-routing_mode = "magic4"
+routing_mode = "magic5"
 
 # time-step for euler integration plotting
 dt = 5
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     print("\n\t Running in", routing_mode, "routing mode with", number_of_robots, "robots.")
 
     print("\n\t Initialising world...")
-    world = World()
+    world = World(number_of_hospitals=15)
 
     # Initialize the robots in random warehouses
     robots = []
