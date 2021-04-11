@@ -1,6 +1,6 @@
 from world import World
 from robot_config import Robot
-from routing_algorithm import routing_algorithm, maxs_attempt_at_robot_return
+from routing_algorithm import route, route_multiple
 from animate_robots import animate_robots, progress_bar
 import ffmpeg
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ import time
 
 number_of_robots = 10
 
-routing_mode = "magic5"
+routing_mode = "random"
 
 # time-step for euler integration plotting
 dt = 20
@@ -48,9 +48,9 @@ if __name__ == "__main__":
     print("\n\t Routing robots...")
     timer_start = time.time()
     if routing_mode == "random":
-        assignment_cost = routing_algorithm(world, robots, mode=routing_mode, number_of_runs=2000)
+        assignment_cost = route_multiple(world, robots, mode=routing_mode, number_of_runs=2000)
     else:
-        assignment_cost = maxs_attempt_at_robot_return(world, robots, mode=routing_mode)
+        assignment_cost = route(world, robots, mode=routing_mode)[1]
     timer_end = time.time()
 
     computation_time = timer_end - timer_start

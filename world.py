@@ -95,8 +95,6 @@ class World:
         # Plot the text for the hospitals
         for node in self.hospitals:
             pointer = self.graph.nodes[node]
-            #plt.text(pointer['x'], pointer['y'], f"  {pointer['init_demand1']}/{pointer['init_demand2']}"
-            #                                     f"/{pointer['priority']}", color="white")
 
             print(pointer['x'], pointer['y'] )
             plt.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",

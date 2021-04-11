@@ -1,197 +1,174 @@
-from numpy import random
+import random
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 import networkx as nx
-import osmnx as ox
-import time
 import cvxpy as cp
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
-
+import copy
 """
 Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each
 robot object.
 """
 
-# TODO change the timing so that traffic and speed limits are taken into account
-def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
+
+def route(world, robots, mode="random"):
     """
+    Routes the world demand and matches it with the robots.
+
     Parameters
     ----------
-    world:  World object
+    world:          World object
         world object as defined in world.py
-    robots: list
+    robots:         list
         list of Robot objects that will be altered for the animation
-    mode:   str
+    mode:           str
         a string that represents the mode we are going to use
     """
+    # Obtain all the tasks
+    tasks = {}
+    for i, hospital in enumerate(world.hospitals):
+        if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
+            pointer = world.graph.nodes[hospital]
+            tasks[hospital] = np.array([pointer['demand1'], pointer['demand2']], dtype=float)
 
+    while True:
+        # Obtain the assignments. Those should be in the form [[hospital_id, np.array([delivered1, delivered2])],...]
+        assignments = routing_algorithm(world, robots, mode=mode)
+        for i, robot_assignments in enumerate(assignments):
+            for assignment in robot_assignments:
+                # Unwrap the assignment
+                hospital, delivered = assignment
+
+                # Append the hospital to the given robot path
+                robots[i]._node_path.append(hospital)
+
+                # Update the tasks list and the world graph
+                tasks[hospital] -= delivered
+                world.graph.nodes[hospital]['demand1'] = max(0, tasks[hospital][0])
+                world.graph.nodes[hospital]['demand2'] = max(0, tasks[hospital][1])
+                if np.all(tasks[hospital] <= 0.):
+                    del tasks[hospital]
+
+            # Append the path to the origin
+            robots[i]._node_path.append(robots[i]._start_node)
+
+        if len(tasks.keys()) == 0:
+            break
+
+    # Conduct path routing
+    flowtime = 0
+    makespan = 0
+
+    for i, robot in enumerate(robots):
+        robot._current_node = robot.start_node
+        total_path = []
+        cost = 0
+        for node in robot._node_path[:-1]:
+            # Calculate the path and distance and update the current_node
+            distance, path = nx.single_source_dijkstra(world.graph, robot._current_node, node, weight='length')
+            total_path.extend(path)
+            cost += distance / robot.speed
+            robot._current_node = node
+
+            # Update the flowtime and the makespan
+            flowtime += cost
+            if cost > makespan:
+                makespan = cost
+
+        # Update the robots path
+        robot._node_path = total_path
+
+    return flowtime, makespan
+
+
+def routing_algorithm(world, robots, mode="random"):
+    """
+    Route the world using various algorithms.
+
+    Parameters
+    ----------
+    world:          World object
+        world object as defined in world.py
+    robots:         list
+        list of Robot objects that will be altered for the animation
+    mode:           str
+        a string that represents the mode we are going to use
+    """
+    assignments = [[] for _ in range(len(robots))]
     if mode == "random":
         """Assign each task to a random robot multiple times to find a distribution."""
-        assignment_costs = []
+        tasks = {}
+        for i, hospital in enumerate(world.hospitals):
+            if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
+                pointer = world.graph.nodes[hospital]
+                tasks[hospital] = np.array([pointer['demand1'], pointer['demand2']], dtype=float)
 
-        for i in range(number_of_runs):
-
-            print("\n\tRun number: ", i)
-
-            # Clear robots
-            for robot in robots:
-                robot._path_length = 0
-                robot._node_path = []
-
-            assignment_cost = 0.0
-            path_lengths = []
-            visited_hospitals = []
-            tasks = []
-
-            for i, hospital in enumerate(world.hospitals):
-                if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
-                    pointer = world.graph.nodes[hospital]
-                    tasks.append(hospital)
-
-            # Assign robots to tasks until there are none left
-            while len(tasks) > 0:
-                print("Remaining tasks: ", tasks)
-                for robot in robots:
-                    if len(tasks) == 0:
-                        break
-                    random_goal = random.choice(tasks)
-                    tasks.remove(random_goal)
-                    source = robot.start_node
-                    try:
-                        path = nx.astar_path(world.graph, source, random_goal, weight='length')
-                        end_path = []
-                        for i in path:
-                            end_path.append(i)
-                        path.reverse()
-                        for i in path:
-                            end_path.append(i)
-                        robot._node_path.extend(end_path)
-
-                        robot._path_length += 2*nx.astar_path_length(world.graph, source, random_goal, weight='length')
-
-                    except:
-                        print("Routing error.")
-                        continue
-
-            for robot in robots:
-                path_lengths.append(robot._path_length)
-            print(path_lengths)
-            try:
-                assignment_cost = max(path_lengths)
-            except:
-                assignment_cost = 0
-
-            print("Maketime: ", assignment_cost)
-            assignment_costs.append(assignment_cost)
-
-        mean_assignment_cost = sum(assignment_costs) / len(assignment_costs)
-        print("Average random maketime: ", round(mean_assignment_cost, 2))
-
-        axs = plt.gca()
-        N, bins, patches = axs.hist(assignment_costs, bins=40)
-        # We'll color code by height, but you could use any scalar
-        fracs = N / N.max()
-        # we need to normalize the data to 0..1 for the full range of the colormap
-        norm = colors.Normalize(fracs.min(), fracs.max())
-        # Now, we'll loop through our objects and set the color of each accordingly
-        for thisfrac, thispatch in zip(fracs, patches):
-            color = plt.cm.viridis(norm(thisfrac))
-            thispatch.set_facecolor(color)
-        # Now we format the y-axis to display percentage
-        axs.yaxis.set_major_formatter(PercentFormatter(xmax=len(assignment_costs)))
-        axs.set_ylabel('Occurance')
-        axs.set_xlabel('Maketime')
-        plt.annotate("Mean assignment cost: %s" % mean_assignment_cost, xy=(0.05, 0.95), xycoords='axes fraction')
-        assignment_cost = mean_assignment_cost
+        # Assign robots to tasks until there are none left
+        while len(tasks) > 0:
+            print("Remaining tasks: ", tasks)
+            for i, robot in enumerate(robots):
+                if len(tasks) == 0:
+                    break
+                random_goal = random.choice(list(tasks.keys()))
+                tasks[random_goal] -= np.array([robot.capacity, robot.capacity])
+                assignments[i].append([random_goal, np.array([robot.capacity, robot.capacity])])
+                if np.all(tasks[random_goal] <= 0.):
+                    del tasks[random_goal]
 
     elif mode == "hungarian":
-
         """ We want a cost matrix of size number_of_robots x no_of_tasks"""
-
         number_of_robots = len(robots)
-
         tasks = []
 
-        print(world.hospitals)
-
         for hospital in world.hospitals:
-
             if world.graph.nodes[hospital]['demand1'] != 0:
-                tasks.append((hospital, 'demand1', world.graph.nodes[hospital]['demand1']))
-
+                tasks.append((hospital, 0, world.graph.nodes[hospital]['demand1']))
             if world.graph.nodes[hospital]['demand2'] != 0:
-                tasks.append((hospital, 'demand2', world.graph.nodes[hospital]['demand2']))
+                tasks.append((hospital, 1, world.graph.nodes[hospital]['demand2']))
 
         cost_matrix = np.zeros((number_of_robots, len(tasks)))
 
-        print(tasks)
-
         # So now we have a list of tasks. Each task is a tuple: (hospital, demand type, demand)
-
         # We also have a cost matrix of the correct size, now we fill it in with the time cost
-
         for i, robot in enumerate(robots):
             for j, task in enumerate(tasks):
                 path_length = nx.shortest_path_length(world.graph, robot.start_node, task[0], weight='length')
 
                 # Calculate time taken to go to that hospital
-
                 time_taken = path_length / robot.speed
-
                 cost_matrix[i][j] = time_taken
-
-        print(cost_matrix)
-
-        # These may be the wrong way round?
 
         robot_ind, task_ind = linear_sum_assignment(cost_matrix)
 
-        print(robot_ind)
-        print(task_ind)
-
         for i, index in enumerate(robot_ind):
-            path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
-                                    weight='length')
+            task = tasks[task_ind[i]]
+            assignments[i].append([task[0], np.array([(1-task[1])*robots[index].capacity,
+                                                      task[1]*robots[index].capacity])])
 
-            # this functionality fulfilled later
-            """end_path = []
-            for j in path:
-                end_path.append(j)
-            path.reverse()
-            for j in path:
-                end_path.append(j)
-            robots[index]._node_path.extend(end_path)"""
+    elif mode == "linear_separate_tasks":
+        # Takes all the tasks as separate tasks, i.e. does not join them together and the robot only delivers one type
+        # of task.
 
-            robots[index]._node_path.extend(path)
-
-        assignment_cost = cost_matrix[robot_ind, task_ind].sum()
-
-        print("Total flowtime: ", assignment_cost)
-
-        # need to add second round / many more rounds of task allocation for remaining tasks
-
-        # need to add better starting node allocation (currently defaults to 0)
-
-    elif mode == "magic1":
         # Obtain all the demand and priority for goods 1 and 2
         demand = []
         tasks = []
+        types = []
         priority = []
         for i, hospital in enumerate(world.hospitals):
             if world.graph.nodes[hospital]['demand1'] != 0:
                 demand.append(world.graph.nodes[hospital]['demand1'])
                 tasks.append(hospital)
+                types.append(0)
                 priority.append(world.graph.nodes[hospital]['priority'])
             if world.graph.nodes[hospital]['demand2'] != 0:
                 demand.append(world.graph.nodes[hospital]['demand2'])
                 tasks.append(hospital)
+                types.append(1)
                 priority.append(world.graph.nodes[hospital]['priority'])
 
-        # Obtain the time cost matrix and the robots' capacity
-        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
-        #   different supplies.
+        # Obtain the time cost matrix and the robots' capacity.
         T = np.zeros((len(robots), len(demand)))
         capacity = np.zeros(len(robots))
         for i, robot in enumerate(robots):
@@ -214,16 +191,16 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         problem.solve()
 
         # Assign the results to the robots and evaluate the costs
-        # print(x.value)
         nonzero = x.value.nonzero()
-        assignment_cost = 0
         for index in range(len(nonzero[0])):
-            robot = robots[nonzero[0][index]]
-            task = tasks[nonzero[1][index]]
-            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
-            assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
+            i = nonzero[1][index]
+            robot = robots[i]
+            task = tasks[i]
+            assignments[i].append([task, np.array([(1-types[i])*robot.capacity, types[i]*robot.capacity])])
 
-    elif mode == "magic2":
+    elif mode == "linear_joined_tasks":
+        # As above but allows the robots to deliver two goods at the same time
+
         # Obtain all the demand and priority for goods 1 and 2
         demand = []
         tasks = []
@@ -237,8 +214,6 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
                 priority.append([pointer['priority'], pointer['priority']])
 
         # Obtain the time cost matrix and the robots' capacity
-        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
-        #   different supplies.
         T = np.zeros((len(robots), len(demand)))
         capacity = np.zeros((len(robots), 2))
 
@@ -263,87 +238,15 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         problem.solve()
 
         # Assign the results to the robots and evaluate the costs
-        # print(x.value)
         nonzero = x.value.nonzero()
-        assignment_cost = 0
-
         for index in range(len(nonzero[0])):
-            robot = robots[nonzero[0][index]]
-            task = tasks[nonzero[1][index]]
-            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
-            assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
+            i = nonzero[1][index]
+            task = tasks[i]
+            assignments[i].append([task, np.array([capacity[i][0], capacity[i][1]])])
 
-    elif mode == "magic3":
-        # Obtain all the demand and priority for goods 1 and 2
-        robots = robots[:1]
-        demand = []
-        tasks = []
-        priority = []
+    elif mode == "tsm":
+        # Method based on the m-travelling salesmen problem
 
-        for i, hospital in enumerate(world.hospitals):
-            if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
-                pointer = world.graph.nodes[hospital]
-                demand.append([pointer['demand1'], pointer['demand2']])
-                tasks.append(hospital)
-                priority.append([pointer['priority'], pointer['priority']])
-
-        # Obtain the time cost matrix and the robots' capacity
-        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
-        #   different supplies.
-        T = np.zeros((len(robots), len(demand)))
-        capacity = np.zeros((len(robots), 2))
-        G = np.zeros((len(demand), len(demand)))
-        for i, robot in enumerate(robots):
-            capacity[i, 0] = robot.capacity
-            capacity[i, 1] = robot.capacity
-            for j, task in enumerate(tasks):
-                path_length = nx.shortest_path_length(world.graph, robot.start_node, task, weight='length')
-                time_taken = path_length / robot.speed
-                T[i][j] = time_taken
-                for k, other_task in enumerate(tasks):
-                    if other_task != task:
-                        path_length = nx.shortest_path_length(world.graph, task, other_task, weight='length')
-                        time_taken = path_length / robot.speed
-                        G[j][k] = time_taken / 2
-                    else:
-                        G[j][k] = 100000
-        print(G.shape)
-
-
-        # Change the demand and priority arrays to numpy ones
-        demand = np.array(demand)
-        priority = np.array(priority) * 10000
-        print(T)
-        # Define the optimization problem
-        x = cp.Variable((len(robots), len(demand)), boolean=True)
-        y = cp.Variable((len(robots), len(demand)), boolean=True)
-        w = cp.Variable(len(demand), pos=True)
-        zeros = np.eye(len(demand))/10000
-        total = np.array(np.concatenate((np.concatenate((zeros, G), axis=1), np.concatenate((G, zeros), axis=1))))
-        print(total)
-        c = cp.Variable((len(demand), 2), integer=True)
-        # print(.shape)
-        cost_next = cp.quad_form(cp.transpose(cp.hstack([x[0, :], y[0, :]])), total)
-        cost = cp.sum(cp.multiply(T, x)) + cost_next + cp.sum(cp.norm1(cp.multiply(c - demand, priority)))
-        objective = cp.Minimize(cost)
-        print(capacity)
-        inequality = [cp.sum(x, axis=1) <= 1, cp.sum(c, axis=2) <= capacity, cp.sum(c, axis=1) <= 1000*cp.vec(x), c >= 0]
-        problem = cp.Problem(objective, inequality)
-        problem.solve()
-
-        # Assign the results to the robots and evaluate the costs
-        print(x.value)
-        print(c.value)
-        nonzero = x.value.nonzero()
-        assignment_cost = 0
-
-        for index in range(len(nonzero[0])):
-            robot = robots[nonzero[0][index]]
-            task = tasks[nonzero[1][index]]
-            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
-            assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
-
-    elif mode == "magic4":
         # Obtain all the demand and priority for goods 1 and 2
         demand = []
         tasks = []
@@ -357,8 +260,6 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
                 priority.append([pointer['priority'], pointer['priority']])
 
         # Obtain the time cost matrix and the robots' capacity
-        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
-        #   different supplies.
         x = []
         v = []
         z = []
@@ -407,21 +308,19 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
             print(f"variable {i + 1}: {x_i.value}")
             print(f"variable {i + 1}: {np.sum(x_i.value * distances[i])}")
             print(f"variable {i + 1}: {capacities[i].value}")
-        assignment_cost = 0
 
-        # for i in range(len(robots)):
-        #     if x[i][1, :]:
-        #
-        #     for row in x[i]:
-        #
-        #     robot = robots[[0][index]]
-        #     task = tasks[nonzero[1][index]]
-        #     robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
-        #     cost += T[nonzero[0][index]][nonzero[1][index]]
-        #     if cost > assignment_cost:
-        #         assignment_cost = cost
+        for i, robot in enumerate(robots):
+            start = np.argmax(x[i].value[0, :])
+            node = np.argmax(x[i].value[start, :])
+            while node != 0:
+                if np.any(capacities[i].value[node-1] != 0):
+                    task = tasks[node-1]
+                    assignments[i].append([task, capacities[i].value[node-1]])
+                node = np.argmax(x[i].value[node, :])
 
-    elif mode == "magic5":
+    elif mode == "home":
+        # Home made method allowing to specify the depth of the solution to be considered N
+
         # Obtain all the demand and priority for goods 1 and 2
         demand = []
         tasks = []
@@ -436,11 +335,8 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
                 priority.append([pointer['priority'], pointer['priority']])
 
         # Obtain the time cost matrix and the robots' capacity
-        # TODO change the robots to allow them maybe move from one hospital to the next without rebasing and to hold
-        #   different supplies.
         x = [[] for _ in range(len(robots))]
         capacities = []
-        distances = []
         constraints = []
         costs = []
 
@@ -470,10 +366,8 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
                 x[i].append(cp.Variable((len(demand), 1), boolean=True))
                 costs.append(cp.sum(cp.multiply(cp.pos(x[i][n - 1] + cp.transpose(x[i][n]) - 1), time_matrix)))
                 constraints.append(cp.sum(x[i][n]) == cp.sum(x[i][0]))
-            # constraints.append(cp.vec(sum(x[i])) <= [1] * (len(demand) + 1))
 
             # Add the capacities constraints
-            #constraints.append(capacities[i] == cp.hstack([robot.capacity*sum(x[i])[1:], robot.capacity*sum(x[i])[1:]]))
             constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
             constraints.append(cp.sum(capacities[i], axis=1) <= 1000*cp.vec(sum(x[i])))
             constraints.append(capacities[i] >= 0)
@@ -494,58 +388,63 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
             for i, x_i in enumerate(robot):
                 print(f"step {i + 1}: {x_i.value.T}")
 
-        assignment_cost = 0
         for i, robot in enumerate(robots):
             robot._current_node = robot.start_node
-            cost = 0
             for j, x_i in enumerate(x[i]):
                 index = np.argmax(x_i.value)
                 if np.any(capacities[i].value[index] != 0):
                     task = tasks[index]
-                    distance, path = nx.single_source_dijkstra(world.graph, robot._current_node, task, weight='length')
-                    robot._node_path += path
-                    cost += distance / robot.speed
+                    assignments[i].append([task, capacities[i].value[index]])
                     robot._current_node = task
-            if cost > assignment_cost:
-                assignment_cost = cost
 
-    return assignment_cost
+    else:
+        raise NotImplementedError
 
-
-def maxs_attempt_at_robot_return(world, robots, mode="random"):
-
-    visited_hospitals = []
-
-    # first round of assignment
-    assignment_cost = routing_algorithm(world, robots, mode=mode)
+    return assignments
 
 
-    for robot in robots:
-        visited_hospitals.append(robot.node_path[-1])
-        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight = 'length')
-        robot._node_path.extend(return_path)
+def route_multiple(world, robots, mode="random", number_of_runs=1):
+    """
+    Routes the world demand and matches it with the robots like in the route method but multiple times to evaluate
+    quantities such as mean, etc. Particularly useful for the random method.
 
-    #print(visited_hospitals)
-    #print(world.hospitals)
+    Parameters
+    ----------
+    world:          World object
+        world object as defined in world.py
+    robots:         list
+        list of Robot objects that will be altered for the animation
+    mode:           str
+        a string that represents the mode we are going to use
+    number_of_runs: int
+        a number which dictates how many runs should be conducted on the given method
+    """
 
-    remaining_tasks = len(world.hospitals)-len(visited_hospitals)
-    print("Remaining tasks: {}".format(remaining_tasks))
-    #print(visited_hospitals)
+    flowtimes = []
+    makespans = []
+    for i in range(number_of_runs):
+        print(f"Run number {i + 1}")
+        flowtime, makespan = route(copy.deepcopy(world), copy.deepcopy(robots), mode)
+        flowtimes.append(flowtime)
+        makespans.append(makespan)
 
-    # remove completed tasks
-    for hospital in world.hospitals:
-        if hospital in visited_hospitals:
-            pointer = world.graph.nodes[hospital]
-            print("Node {} visited, clearing demands.".format(hospital))
-            pointer['demand1'] = 0
-            pointer['demand2'] = 0
+    mean_assignment_cost = sum(makespans) / len(makespans)
+    print("Average random maketime: ", round(mean_assignment_cost, 2))
 
-    # reassign robots to incomplete tasks
+    axs = plt.gca()
+    N, bins, patches = axs.hist(makespans, bins=40)
+    # We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+    # we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+    # Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches):
+        color = plt.cm.viridis(norm(thisfrac))
+        thispatch.set_facecolor(color)
+    # Now we format the y-axis to display percentage
+    axs.yaxis.set_major_formatter(PercentFormatter(xmax=len(makespans)))
+    axs.set_ylabel('Occurance')
+    axs.set_xlabel('Maketime')
+    plt.annotate("Mean assignment cost: %s" % mean_assignment_cost, xy=(0.05, 0.95), xycoords='axes fraction')
 
-    assignment_cost += routing_algorithm(world, robots, mode=mode)
-
-    for robot in robots:
-        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight='length')
-        robot._node_path.extend(return_path)
-
-    return assignment_cost
+    return mean_assignment_cost
