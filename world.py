@@ -35,7 +35,7 @@ class World:
         self.graph_type1 = ox.add_edge_travel_times(self.graph)
         self.graph_type2 = ox.add_edge_travel_times(self.graph)
 
-        # Generate random warehouses
+        # Generate random warehouses and hospitals
         np.random.seed(seed)
         random_locations = np.random.choice(self.graph.nodes, number_of_warehouses + number_of_hospitals, replace=False)
         random_warehouse_locations = random_locations[:number_of_warehouses]

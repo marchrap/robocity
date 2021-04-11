@@ -13,6 +13,7 @@ class Robot:
 
         # added by max
         self._node_path = []
+        self._path_length = 0
         self._node_instructions = {}
         self._start_node = 0
 

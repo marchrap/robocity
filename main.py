@@ -11,10 +11,10 @@ import time
 
 number_of_robots = 10
 
-routing_mode = "magic2"
+routing_mode = "random"
 
 # time-step for euler integration plotting
-dt = 2
+dt = 20
 
 if __name__ == "__main__":
     # Initialize the world
@@ -47,8 +47,10 @@ if __name__ == "__main__":
     # Invoke the routing algorithm
     print("\n\t Routing robots...")
     timer_start = time.time()
-    #assignment_cost = routing_algorithm(world, robots, mode=routing_mode)
-    assignment_cost = maxs_attempt_at_robot_return(world, robots, mode=routing_mode)
+    if routing_mode == "random":
+        assignment_cost = routing_algorithm(world, robots, mode=routing_mode, number_of_runs=1000)
+    else:
+        assignment_cost = maxs_attempt_at_robot_return(world, robots, mode=routing_mode)
     timer_end = time.time()
 
     computation_time = timer_end - timer_start
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     mpl.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\maxw\\PycharmProjects\\4I15 MRS Robocity\\ffmpeg-4.4' \
                                             r'-full_build\\bin\\ffmpeg.exe '
 
-    render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
+    #render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
 
     plt.show()
 
