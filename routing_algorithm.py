@@ -194,9 +194,10 @@ def routing_algorithm(world, robots, mode="random"):
         nonzero = x.value.nonzero()
         for index in range(len(nonzero[0])):
             i = nonzero[1][index]
-            robot = robots[i]
+            j = nonzero[0][index]
+            robot = robots[j]
             task = tasks[i]
-            assignments[i].append([task, np.array([(1-types[i])*robot.capacity, types[i]*robot.capacity])])
+            assignments[j].append([task, np.array([(1-types[i])*robot.capacity, types[i]*robot.capacity])])
 
     elif mode == "linear_joined_tasks":
         # As above but allows the robots to deliver two goods at the same time
