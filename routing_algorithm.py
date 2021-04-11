@@ -239,10 +239,12 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Assign the results to the robots and evaluate the costs
         nonzero = x.value.nonzero()
+        print(nonzero)
         for index in range(len(nonzero[0])):
             i = nonzero[1][index]
+            j = nonzero[0][index]
             task = tasks[i]
-            assignments[i].append([task, np.array([capacity[i][0], capacity[i][1]])])
+            assignments[j].append([task, np.array([capacity[j][0], capacity[j][1]])])
 
     elif mode == "tsm":
         # Method based on the m-travelling salesmen problem
