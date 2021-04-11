@@ -90,7 +90,7 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         print("Average random maketime: ", round(mean_assignment_cost, 2))
 
         axs = plt.gca()
-        N, bins, patches = axs.hist(assignment_costs, bins=20)
+        N, bins, patches = axs.hist(assignment_costs, bins=40)
         # We'll color code by height, but you could use any scalar
         fracs = N / N.max()
         # we need to normalize the data to 0..1 for the full range of the colormap
@@ -154,13 +154,17 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         for i, index in enumerate(robot_ind):
             path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
                                     weight='length')
-            end_path = []
+
+            # this functionality fulfilled later
+            """end_path = []
             for j in path:
                 end_path.append(j)
             path.reverse()
             for j in path:
                 end_path.append(j)
-            robots[index]._node_path = end_path
+            robots[index]._node_path.extend(end_path)"""
+
+            robots[index]._node_path.extend(path)
 
         assignment_cost = cost_matrix[robot_ind, task_ind].sum()
 
@@ -216,7 +220,7 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic2":
@@ -336,7 +340,7 @@ def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic4":
@@ -438,6 +442,7 @@ def maxs_attempt_at_robot_return(world, robots, mode="random"):
 
     remaining_tasks = len(world.hospitals)-len(visited_hospitals)
     print("Remaining tasks: {}".format(remaining_tasks))
+    #print(visited_hospitals)
 
     # remove completed tasks
     for hospital in world.hospitals:
