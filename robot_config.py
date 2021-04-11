@@ -13,6 +13,7 @@ class Robot:
 
         # added by max
         self._node_path = []
+        self._path_length = 0
         self._node_instructions = {}
         self._start_node = 0
 
@@ -143,11 +144,5 @@ class Robot:
         return self._node_path
 
     @property
-    # dictionary of integers and instructions
-    def node_instructions(self):
-        return self._node_instructions
-
-    @property
-    # dictionary of integers and instructions
     def start_node(self):
         return self._start_node

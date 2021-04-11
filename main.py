@@ -1,10 +1,11 @@
 from world import World
 from robot_config import Robot
-from routing_algorithm import routing_algorithm
-from animate_robots import animate_robots
-
+from routing_algorithm import routing_algorithm, maxs_attempt_at_robot_return
+from animate_robots import animate_robots, progress_bar
+import ffmpeg
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib as mpl
 
 import time
 
@@ -13,7 +14,7 @@ number_of_robots = 10
 routing_mode = "magic5"
 
 # time-step for euler integration plotting
-dt = 5
+dt = 20
 
 if __name__ == "__main__":
     # Initialize the world
@@ -32,7 +33,7 @@ if __name__ == "__main__":
         warehouse = np.random.choice(world.warehouses)
         pointer = world.graph.nodes[warehouse]
         position = np.array([pointer['x'], pointer['y']])
-        if i > 1:
+        if i > number_of_robots/2 - 1:
             robot_type = 1
         else:
             robot_type = 0
@@ -46,7 +47,10 @@ if __name__ == "__main__":
     # Invoke the routing algorithm
     print("\n\t Routing robots...")
     timer_start = time.time()
-    assignment_cost = routing_algorithm(world, robots, mode=routing_mode)
+    if routing_mode == "random":
+        assignment_cost = routing_algorithm(world, robots, mode=routing_mode, number_of_runs=2000)
+    else:
+        assignment_cost = maxs_attempt_at_robot_return(world, robots, mode=routing_mode)
     timer_end = time.time()
 
     computation_time = timer_end - timer_start
@@ -63,17 +67,21 @@ if __name__ == "__main__":
 
     plt.annotate("Routing method: %s" % routing_mode, xy=(0.05, 0.95), xycoords='axes fraction',
                  backgroundcolor='white')
-    plt.annotate("Flowtime: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
+    plt.annotate("Maketime: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
                  backgroundcolor='white')
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
 
-    print("\n\t Robots routed with total flowtime of:", assignment_cost)
+    print("\n\t Robots routed with assignment_cost of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)
 
     import time
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    #ani.save("animation%s.gif" % timestr)
+    mpl.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\maxw\\PycharmProjects\\4I15 MRS Robocity\\ffmpeg-4.4' \
+                                            r'-full_build\\bin\\ffmpeg.exe '
+
+    #render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
 
     plt.show()
+

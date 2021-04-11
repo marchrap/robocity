@@ -5,6 +5,9 @@ import networkx as nx
 import osmnx as ox
 import time
 import cvxpy as cp
+from matplotlib import colors
+from matplotlib.ticker import PercentFormatter
+import matplotlib.pyplot as plt
 
 """
 Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each
@@ -12,7 +15,7 @@ robot object.
 """
 
 # TODO change the timing so that traffic and speed limits are taken into account
-def routing_algorithm(world, robots, mode="random"):
+def routing_algorithm(world, robots, mode="random", number_of_runs = 1):
     """
     Parameters
     ----------
@@ -25,37 +28,83 @@ def routing_algorithm(world, robots, mode="random"):
     """
 
     if mode == "random":
-        """Assign each robot with a random goal."""
+        """Assign each task to a random robot multiple times to find a distribution."""
+        assignment_costs = []
 
-        assignment_cost = 0.0
+        for i in range(number_of_runs):
 
-        # print(world.hospitals)
-        for robot in robots:
-            random_goal = random.choice(world.hospitals)
-            # print(random_goal)
-            # source = ox.get_nearest_node(world.graph, robot.position[::-1])
-            source = robot.start_node
-            # print(source)
+            print("\n\tRun number: ", i)
+
+            # Clear robots
+            for robot in robots:
+                robot._path_length = 0
+                robot._node_path = []
+
+            assignment_cost = 0.0
+            path_lengths = []
+            visited_hospitals = []
+            tasks = []
+
+            for i, hospital in enumerate(world.hospitals):
+                if world.graph.nodes[hospital]['demand1'] != 0 or world.graph.nodes[hospital]['demand2'] != 0:
+                    pointer = world.graph.nodes[hospital]
+                    tasks.append(hospital)
+
+            # Assign robots to tasks until there are none left
+            while len(tasks) > 0:
+                print("Remaining tasks: ", tasks)
+                for robot in robots:
+                    if len(tasks) == 0:
+                        break
+                    random_goal = random.choice(tasks)
+                    tasks.remove(random_goal)
+                    source = robot.start_node
+                    try:
+                        path = nx.astar_path(world.graph, source, random_goal, weight='length')
+                        end_path = []
+                        for i in path:
+                            end_path.append(i)
+                        path.reverse()
+                        for i in path:
+                            end_path.append(i)
+                        robot._node_path.extend(end_path)
+
+                        robot._path_length += 2*nx.astar_path_length(world.graph, source, random_goal, weight='length')
+
+                    except:
+                        print("Routing error.")
+                        continue
+
+            for robot in robots:
+                path_lengths.append(robot._path_length)
+            print(path_lengths)
             try:
-                path = nx.astar_path(world.graph, source, random_goal, weight='length')
-                # path = ox.distance.shortest_path(world.graph, source, random_goal, weight='travel_time')
-                end_path = []
-                for i in path:
-                    end_path.append(i)
-                path.reverse()
-                for i in path:
-                    end_path.append(i)
-                robot._node_path = end_path
-
-                path_length = nx.astar_path_length(world.graph, source, random_goal, weight='length')
-
-                assignment_cost += path_length / robot.speed
-
+                assignment_cost = max(path_lengths)
             except:
-                print("Routing error.")
-                continue
+                assignment_cost = 0
 
-        print("Total flowtime: ", assignment_cost)
+            print("Maketime: ", assignment_cost)
+            assignment_costs.append(assignment_cost)
+
+        mean_assignment_cost = sum(assignment_costs) / len(assignment_costs)
+        print("Average random maketime: ", round(mean_assignment_cost, 2))
+
+        axs = plt.gca()
+        N, bins, patches = axs.hist(assignment_costs, bins=40)
+        # We'll color code by height, but you could use any scalar
+        fracs = N / N.max()
+        # we need to normalize the data to 0..1 for the full range of the colormap
+        norm = colors.Normalize(fracs.min(), fracs.max())
+        # Now, we'll loop through our objects and set the color of each accordingly
+        for thisfrac, thispatch in zip(fracs, patches):
+            color = plt.cm.viridis(norm(thisfrac))
+            thispatch.set_facecolor(color)
+        # Now we format the y-axis to display percentage
+        axs.yaxis.set_major_formatter(PercentFormatter(xmax=len(assignment_costs)))
+        axs.set_ylabel('Occurance')
+        axs.set_xlabel('Maketime')
+        plt.annotate("Mean assignment cost: %s" % mean_assignment_cost, xy=(0.05, 0.95), xycoords='axes fraction')
+        assignment_cost = mean_assignment_cost
 
     elif mode == "hungarian":
 
@@ -104,14 +153,18 @@ def routing_algorithm(world, robots, mode="random"):
 
         for i, index in enumerate(robot_ind):
             path = nx.shortest_path(world.graph, robots[index].start_node, tasks[i][0],
-                                                        weight='length')
-            end_path = []
-            for i in path:
-                end_path.append(i)
+                                    weight='length')
+
+            # this functionality fulfilled later
+            """end_path = []
+            for j in path:
+                end_path.append(j)
             path.reverse()
-            for i in path:
-                end_path.append(i)
-            robots[index]._node_path = end_path
+            for j in path:
+                end_path.append(j)
+            robots[index]._node_path.extend(end_path)"""
+
+            robots[index]._node_path.extend(path)
 
         assignment_cost = cost_matrix[robot_ind, task_ind].sum()
 
@@ -167,7 +220,7 @@ def routing_algorithm(world, robots, mode="random"):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic2":
@@ -217,7 +270,7 @@ def routing_algorithm(world, robots, mode="random"):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic3":
@@ -287,7 +340,7 @@ def routing_algorithm(world, robots, mode="random"):
         for index in range(len(nonzero[0])):
             robot = robots[nonzero[0][index]]
             task = tasks[nonzero[1][index]]
-            robot._node_path = nx.shortest_path(world.graph, robot.start_node, task, weight='length')
+            robot._node_path.extend(nx.shortest_path(world.graph, robot.start_node, task, weight='length'))
             assignment_cost += T[nonzero[0][index]][nonzero[1][index]]
 
     elif mode == "magic4":
@@ -458,3 +511,41 @@ def routing_algorithm(world, robots, mode="random"):
 
     return assignment_cost
 
+
+def maxs_attempt_at_robot_return(world, robots, mode="random"):
+
+    visited_hospitals = []
+
+    # first round of assignment
+    assignment_cost = routing_algorithm(world, robots, mode=mode)
+
+
+    for robot in robots:
+        visited_hospitals.append(robot.node_path[-1])
+        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight = 'length')
+        robot._node_path.extend(return_path)
+
+    #print(visited_hospitals)
+    #print(world.hospitals)
+
+    remaining_tasks = len(world.hospitals)-len(visited_hospitals)
+    print("Remaining tasks: {}".format(remaining_tasks))
+    #print(visited_hospitals)
+
+    # remove completed tasks
+    for hospital in world.hospitals:
+        if hospital in visited_hospitals:
+            pointer = world.graph.nodes[hospital]
+            print("Node {} visited, clearing demands.".format(hospital))
+            pointer['demand1'] = 0
+            pointer['demand2'] = 0
+
+    # reassign robots to incomplete tasks
+
+    assignment_cost += routing_algorithm(world, robots, mode=mode)
+
+    for robot in robots:
+        return_path = nx.astar_path(world.graph, robot.node_path[-1], robot.start_node, weight='length')
+        robot._node_path.extend(return_path)
+
+    return assignment_cost
