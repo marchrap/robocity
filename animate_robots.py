@@ -92,6 +92,7 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
             plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
         line_sprites.append(plt.plot([], [], color=colour, alpha=.75))
         # plt.plot(*zip(*path), color=colour, alpha=.5)
+        print("path: ",robot._node_path)
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 

@@ -11,6 +11,16 @@ import time
 
 number_of_robots = 10
 
+"""
+routing_mode options:
+"random"
+"hungarian"
+"linear_separate_tasks"
+"linear_joined_tasks"
+"tsm"
+"home"
+"""
+
 routing_mode = "random"
 
 # time-step for euler integration plotting
@@ -48,7 +58,7 @@ if __name__ == "__main__":
     print("\n\t Routing robots...")
     timer_start = time.time()
     if routing_mode == "random":
-        assignment_cost = route_multiple(world, robots, mode=routing_mode, number_of_runs=2000)
+        assignment_cost = route_multiple(world, robots, mode=routing_mode, number_of_runs=1)
     else:
         assignment_cost = route(world, robots, mode=routing_mode)[1]
     timer_end = time.time()
@@ -67,7 +77,7 @@ if __name__ == "__main__":
 
     plt.annotate("Routing method: %s" % routing_mode, xy=(0.05, 0.95), xycoords='axes fraction',
                  backgroundcolor='white')
-    plt.annotate("Maketime: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
+    plt.annotate("Makespan: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
                  backgroundcolor='white')
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
