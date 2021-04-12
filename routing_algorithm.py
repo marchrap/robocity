@@ -45,15 +45,17 @@ def route(world, robots, mode="random"):
                 robots[i]._node_path.append(hospital)
 
                 # Update the tasks list and the world graph
-                tasks[hospital] -= delivered
-                world.graph.nodes[hospital]['demand1'] = max(0, tasks[hospital][0])
-                world.graph.nodes[hospital]['demand2'] = max(0, tasks[hospital][1])
-                if np.all(tasks[hospital] <= 0.):
-                    del tasks[hospital]
+                if hospital in tasks:
+                    tasks[hospital] -= delivered
+                    tasks[hospital] = np.clip(tasks[hospital], 0, None)
+                    world.graph.nodes[hospital]['demand1'] = max(0, tasks[hospital][0])
+                    world.graph.nodes[hospital]['demand2'] = max(0, tasks[hospital][1])
+                    if np.all(np.isclose(tasks[hospital], 0)):
+                        del tasks[hospital]
 
             # Append the path to the origin
             robots[i]._node_path.append(robots[i]._start_node)
-
+        print(tasks)
         if len(tasks.keys()) == 0:
             break
 
@@ -278,7 +280,7 @@ def routing_algorithm(world, robots, mode="random"):
             capacities.append(cp.Variable((len(demand), 2)))
 
             # Add constraints
-            constraints.append(cp.sum(x[i], axis=1) == v[i])  # Note if city is moved from
+            constraints.append(cp.sum(x[i], axis=0) == v[i])  # Note if city is moved from
             constraints.append(cp.sum(x[i], axis=0) == cp.sum(x[i], axis=1))  # Note if city is visited
             constraints.append(z[i] - cp.transpose(z[i]) + len(demand) * x[i][1:, 1:] <= len(demand) - 1)
             constraints.append(cp.sum(x[i], axis=1) <= cp.sum(x[i][0, :]))  # We start from 0th node
@@ -313,8 +315,7 @@ def routing_algorithm(world, robots, mode="random"):
             print(f"variable {i + 1}: {capacities[i].value}")
 
         for i, robot in enumerate(robots):
-            start = np.argmax(x[i].value[0, :])
-            node = np.argmax(x[i].value[start, :])
+            node = np.argmax(x[i].value[0, :])
             while node != 0:
                 if np.any(capacities[i].value[node-1] != 0):
                     task = tasks[node-1]
