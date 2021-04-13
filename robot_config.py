@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 
 
@@ -19,6 +20,7 @@ class Robot:
 
         # by Marcin
         self._current_node = 0
+        self._delivered = collections.deque()
 
         # Initialise values
         self._medical_payload = 0  # Set initial payloads to 0

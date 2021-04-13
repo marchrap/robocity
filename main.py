@@ -9,7 +9,7 @@ import matplotlib as mpl
 
 import time
 
-number_of_robots = 2
+number_of_robots = 10
 
 """
 routing_mode options:
@@ -93,8 +93,6 @@ if __name__ == "__main__":
 
     mpl.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\maxw\\PycharmProjects\\4I15 MRS Robocity\\ffmpeg-4.4' \
                                             r'-full_build\\bin\\ffmpeg.exe '
-
-
 
     #render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
 
