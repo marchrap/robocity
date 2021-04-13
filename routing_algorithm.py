@@ -44,6 +44,10 @@ def route(world, robots, mode="random"):
                 # Append the hospital to the given robot path
                 robots[i]._node_path.append(hospital)
 
+                # Bodge fit for random mode only.
+                if mode == "random":
+                    robots[i]._node_path.append(robots[i].start_node)
+
                 # Update the tasks list and the world graph
                 if hospital in tasks:
                     tasks[hospital] -= delivered
@@ -440,7 +444,7 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
             filehandle.write('%s\n' % listitem)
 
     axs = plt.gca()
-    N, bins, patches = axs.hist(makespans, bins=40)
+    N, bins, patches = axs.hist(makespans, bins=20)
     # We'll color code by height, but you could use any scalar
     fracs = N / N.max()
     # we need to normalize the data to 0..1 for the full range of the colormap

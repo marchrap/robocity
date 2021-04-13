@@ -14,6 +14,7 @@ number_of_robots = 10
 """
 routing_mode options:
 "random"
+"random_multiple"
 "hungarian"
 "linear_separate_tasks"
 "linear_joined_tasks"
@@ -21,7 +22,9 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "magic2"
+routing_mode = "random_multiple"
+number_of_runs = 2000
+
 
 # time-step for euler integration plotting
 dt = 20
@@ -57,8 +60,8 @@ if __name__ == "__main__":
     # Invoke the routing algorithm
     print("\n\t Routing robots...")
     timer_start = time.time()
-    if routing_mode == "random":
-        assignment_cost = route_multiple(world, robots, mode=routing_mode, number_of_runs=1)
+    if routing_mode == "random_multiple":
+        assignment_cost = route_multiple(world, robots, mode="random", number_of_runs=number_of_runs)
     else:
         assignment_cost = route(world, robots, mode=routing_mode)[1]
     timer_end = time.time()
@@ -67,7 +70,7 @@ if __name__ == "__main__":
 
     # Plot everything and save animation
     print("\n\t Plotting graphs...")
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(16, 16))
     ax.set_facecolor('black')
     world.plot(ax=ax, show=False)
     print("\n\t Calculating animation...")
