@@ -59,7 +59,7 @@ def route(world, robots, mode="random"):
 
             # Append the path to the origin
             robots[i]._node_path.append(robots[i]._start_node)
-        print(tasks)
+        #print(tasks)
         if len(tasks.keys()) == 0:
             break
 
@@ -113,7 +113,7 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Assign robots to tasks until there are none left
         while len(tasks) > 0:
-            print("Remaining tasks: ", tasks)
+            #print("Remaining tasks: ", tasks)
             for i, robot in enumerate(robots):
                 if len(tasks) == 0:
                     break
@@ -246,7 +246,7 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Assign the results to the robots and evaluate the costs
         nonzero = x.value.nonzero()
-        print(nonzero)
+        #print(nonzero)
         for index in range(len(nonzero[0])):
             i = nonzero[1][index]
             j = nonzero[0][index]
@@ -439,7 +439,7 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
     mean_assignment_cost = sum(makespans) / len(makespans)
     print("Average random maketime: ", round(mean_assignment_cost, 2))
 
-    with open('random_assignment_costs.txt', 'w') as filehandle:
+    with open('random_assignment_costs{}.txt'.format(number_of_runs), 'w') as filehandle:
         for listitem in makespans:
             filehandle.write('%s\n' % listitem)
 

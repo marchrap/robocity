@@ -29,14 +29,21 @@ class Robot:
 
         # Basic type
         if self._type == 0:
-            self._capacity = 10  # Payload capacity
+            self._capacity = 3  # Payload capacity
             self._speed = 4  # Speed
             self._fuelcap = 100  # Fuel capacity
             self._fuel = self._fuelcap  # Set initial fuel as a full tank
             self._weight = 10
 
         elif self._type == 1:
-            self._capacity = 5  # Payload capacity
+            self._capacity = 2  # Payload capacity
+            self._speed = 6 # Speed
+            self._fuelcap = 100  # Fuel capacity
+            self._fuel = self._fuelcap  # Set initial fuel as a full tank
+            self._weight = 5
+
+        elif self._type == 2:
+            self._capacity = 1  # Payload capacity
             self._speed = 12 # Speed
             self._fuelcap = 100  # Fuel capacity
             self._fuel = self._fuelcap  # Set initial fuel as a full tank
