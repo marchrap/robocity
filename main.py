@@ -1,7 +1,7 @@
 from world import World
 from robot_config import Robot
 from routing_algorithm import route, route_multiple
-from animate_robots import animate_robots, progress_bar
+from animate_robots import animate_robots
 import ffmpeg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +21,7 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "random"
+routing_mode = "magic2"
 
 # time-step for euler integration plotting
 dt = 20
