@@ -188,3 +188,5 @@ if __name__ == "__main__":
             filehandle2.write('%s\t%s\t%f\t%f\t%f\t%f\t%f\t%f\n' % (
                 routing_mode, robot_distribution[0], robot_distribution[1],
                 robot_distribution[2], n_robots+1, assignment_cost, computation_time, total_speed_capacity))
+
+    print("\n\tExperiment complete.")

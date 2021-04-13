@@ -3,9 +3,14 @@ from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+robot_type_filename = "results20210413-192130.txt"
+robot_number_filename = "robot_number_results20210413-234650.txt"
+
+
 if __name__ == "__main__":
 
-    with open('results20210413-192130.txt', 'r') as filehandle:
+    with open(robot_type_filename, 'r') as filehandle:
         results = []
         for line in filehandle:
             result = []
@@ -66,23 +71,19 @@ if __name__ == "__main__":
 
     fig1, ax1 = plt.subplots()
     x = list(zip(*robot_configs))[0]
-    y = random_makespans
-    plt.scatter(list(zip(*robot_configs))[0], random_makespans, label="random")
-    z = np.polyfit(x, y, 1)
-    p = np.poly1d(z)
-    plt.plot(x, p(x), "r--")
-    plt.plot(list(zip(*robot_configs))[0], random_multiple_makespans, label="random_multiple")
-    plt.plot(list(zip(*robot_configs))[0], hungarian_makespans, label="hungarian")
-    plt.plot(list(zip(*robot_configs))[0], linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(list(zip(*robot_configs))[0], linear_joined_tasks_makespans, label="linear_joined_tasks")
-    #plt.plot(list(zip(*robot_configs))[0], tsm_makespans, label="tsm")
-    #plt.plot(list(zip(*robot_configs))[0], home_makespans, label="home")
+    plt.plot(x, random_makespans, label="random")
+    plt.plot(x, random_multiple_makespans, label="random_multiple")
+    plt.plot(x, hungarian_makespans, label="hungarian")
+    plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
+    plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
+    #plt.plot(x, tsm_makespans, label="tsm")
+    #plt.plot(x, home_makespans, label="home")
 
     plt.xlabel("Number of robots of type 1")
     plt.ylabel("Makespan (s)")
     plt.legend()
 
-    with open('robot_number_results20210413-234135.txt', 'r') as filehandle:
+    with open(robot_number_filename, 'r') as filehandle:
         results = []
         for line in filehandle:
             result = []
