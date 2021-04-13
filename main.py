@@ -22,7 +22,7 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "home"
+routing_mode = "linear_joined_tasks"
 number_of_runs = 2000
 
 

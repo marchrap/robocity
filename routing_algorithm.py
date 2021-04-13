@@ -82,12 +82,15 @@ def route(world, robots, mode="random"):
             cost += distance / robot.speed
             robot._current_node = node
 
-            # Update the flowtime, makespan and the score
-            flowtime += cost
+            # Update the score with the current node
             if node != robot.start_node:
                 score += np.sum(robot._delivered.popleft() * world.graph.nodes[node]['priority']) * np.exp(-cost / 1000)
-            if cost > makespan:
-                makespan = cost
+
+        # Update the flowtime and the makespan
+        flowtime += cost
+        if cost > makespan:
+            makespan = cost
+
         # Update the robots path
         robot._node_path = total_path
 
