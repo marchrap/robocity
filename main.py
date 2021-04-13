@@ -9,7 +9,7 @@ import matplotlib as mpl
 
 import time
 
-number_of_robots = 10
+number_of_robots = 2
 
 """
 routing_mode options:
@@ -22,7 +22,7 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "random_multiple"
+routing_mode = "hungarian"
 number_of_runs = 2000
 
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     # Plot everything and save animation
     print("\n\t Plotting graphs...")
-    fig, ax = plt.subplots(figsize=(16, 16))
+    fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_facecolor('black')
     world.plot(ax=ax, show=False)
     print("\n\t Calculating animation...")
