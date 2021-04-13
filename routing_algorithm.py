@@ -50,6 +50,9 @@ def route(world, robots, mode="random"):
 
                 # Update the tasks list and the world graph
                 if hospital in tasks:
+                    # Add the delivered to the robot's delivered
+                    robots[i]._delivered.append(np.min([delivered, tasks[hospital]], axis=0))
+
                     tasks[hospital] -= delivered
                     tasks[hospital] = np.clip(tasks[hospital], 0, None)
                     world.graph.nodes[hospital]['demand1'] = max(0, tasks[hospital][0])
@@ -66,6 +69,7 @@ def route(world, robots, mode="random"):
     # Conduct path routing
     flowtime = 0
     makespan = 0
+    score = 0
 
     for i, robot in enumerate(robots):
         robot._current_node = robot.start_node
@@ -78,15 +82,16 @@ def route(world, robots, mode="random"):
             cost += distance / robot.speed
             robot._current_node = node
 
-            # Update the flowtime and the makespan
+            # Update the flowtime, makespan and the score
             flowtime += cost
+            if node != robot.start_node:
+                score += np.sum(robot._delivered.popleft() * world.graph.nodes[node]['priority']) * np.exp(-cost / 1000)
             if cost > makespan:
                 makespan = cost
-
         # Update the robots path
         robot._node_path = total_path
 
-    return flowtime, makespan
+    return flowtime, makespan, score
 
 
 def routing_algorithm(world, robots, mode="random"):
@@ -310,7 +315,7 @@ def routing_algorithm(world, robots, mode="random"):
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=60, allowablePercentageGap=10)
+        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=120, allowablePercentageGap=10)
 
         # Assign the results to the robots and evaluate the costs
         for i, x_i in enumerate(x):

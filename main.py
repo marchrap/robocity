@@ -22,7 +22,7 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "random_multiple"
+routing_mode = "home"
 number_of_runs = 2000
 
 
