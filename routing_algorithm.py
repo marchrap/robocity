@@ -151,6 +151,9 @@ def routing_algorithm(world, robots, mode="random"):
         # We also have a cost matrix of the correct size, now we fill it in with the time cost
         for i, robot in enumerate(robots):
             for j, task in enumerate(tasks):
+
+                #print("robot: {}, task: {}".format(i,j))
+
                 path_length = nx.shortest_path_length(world.graph, robot.start_node, task[0], weight='length')
 
                 # Calculate time taken to go to that hospital
@@ -160,6 +163,8 @@ def routing_algorithm(world, robots, mode="random"):
         robot_ind, task_ind = linear_sum_assignment(cost_matrix)
 
         for i, index in enumerate(robot_ind):
+            #print("robot_ind: ", i)
+
             task = tasks[task_ind[i]]
             assignments[i].append([task[0], np.array([(1 - task[1]) * robots[index].capacity,
                                                       task[1] * robots[index].capacity])])

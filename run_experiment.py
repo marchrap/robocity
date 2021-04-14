@@ -10,9 +10,9 @@ from math import ceil
 """ Select experiments """
 
 test_methods = 1
-test_varying_robot_types = 1
-test_varying_robot_numbers = 1
-test_demand_changes = 1
+test_varying_robot_types = 0
+test_varying_robot_numbers = 0
+test_demand_changes = 0
 
 """
 test_methods:
