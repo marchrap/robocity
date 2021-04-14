@@ -54,7 +54,7 @@ routing_modes = ["random",
                  "hungarian",
                  "linear_separate_tasks",
                  "linear_joined_tasks",
-                 "tsm_short"
+                 "tsm_short",
                  "tsm",
                  "home"
                  ]
