@@ -132,10 +132,7 @@ def progress_bar(current_frame, total_frames):
 
 
 def progress_bar2(current_frame, total_frames):
+    bar = ProgressBar()
     if current_frame == 0:
         bar = ProgressBar(max_value=total_frames, redirect_stdout=True)
-    try:
-        bar.update(current_frame)
-    except UnboundLocalError:
-        pass
-
+    bar.update(current_frame)
