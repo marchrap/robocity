@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from robot_config import Robot
-from progress.bar import IncrementalBar
+from progressbar import ProgressBar
 
 """
 Takes world and robots, plots the world, then plots animations of robots path_of_node_integers on top.
@@ -79,7 +79,7 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
     ax: existing axes
     """
 
-    # robot_sprites = []
+    # new_robot_sprites = []
     # line_sprites = []
     # plot_paths = []
 
@@ -92,13 +92,17 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
         b = np.random.random()
         g = np.random.random()
         colour = (r, g, b)
-        robot_sprites.append(
-            plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
-        line_sprites.append(plt.plot([], [], color=colour, alpha=.75))
+        sprite = plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}',
+                            alpha=.75)
+        line_sprites.append(ax.plot([], [], color=colour, alpha=.75))
         # plt.plot(*zip(*path), color=colour, alpha=.5)
         print("path: ", robot._node_path)
-    for sprite in robot_sprites:
         ax.add_patch(sprite)
+        robot_sprites.append(sprite)
+        # new_robot_sprites.append(sprite)
+
+    # for sprite in robot_sprites:
+    #    ax.add_patch(sprite)
 
     # print(robot_sprites)
     # print(plot_paths)
@@ -125,3 +129,13 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
 
 def progress_bar(current_frame, total_frames):
     print("Frame {}/{}".format(current_frame + 1, total_frames))
+
+
+def progress_bar2(current_frame, total_frames):
+    if current_frame == 0:
+        bar = ProgressBar(max_value=total_frames, redirect_stdout=True)
+    try:
+        bar.update(current_frame)
+    except UnboundLocalError:
+        pass
+

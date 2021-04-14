@@ -90,9 +90,7 @@ class World:
                 node_colors.append("#00000000")
 
         # Plot the graph
-        print("Hey 4")
         ox.plot_graph(self.graph, ax=ax, node_color=node_colors, node_size=80, show=False)
-        print("Hey 5")
 
         # Plot the text for the hospitals
         for node in self.hospitals:
