@@ -59,6 +59,9 @@ def route(world, robots, mode="random"):
                     world.graph.nodes[hospital]['demand2'] = max(0, tasks[hospital][1])
                     if np.all(np.isclose(tasks[hospital], 0)):
                         del tasks[hospital]
+                elif hospital != robots[i].start_node:
+                    # Add the delivered to the robot's delivered if task not in hospitals
+                    robots[i]._delivered.append(np.zeros_like(delivered))
 
             # Append the path to the origin
             robots[i]._node_path.append(robots[i]._start_node)
@@ -250,7 +253,7 @@ def routing_algorithm(world, robots, mode="random"):
         objective = cp.Minimize(cost)
         inequality = [cp.sum(x, axis=1) <= 1]
         problem = cp.Problem(objective, inequality)
-        problem.solve()
+        problem.solve(verbose=True, tm_lim=60000)
 
         # Assign the results to the robots and evaluate the costs
         nonzero = x.value.nonzero()
@@ -318,7 +321,7 @@ def routing_algorithm(world, robots, mode="random"):
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=120, allowablePercentageGap=10)
+        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, logLevel=1, maximumSeconds=120, allowablePercentageGap=10)
 
         # Assign the results to the robots and evaluate the costs
         for i, x_i in enumerate(x):
@@ -329,8 +332,8 @@ def routing_algorithm(world, robots, mode="random"):
         for i, robot in enumerate(robots):
             node = np.argmax(x[i].value[0, :])
             while node != 0:
-                if np.any(capacities[i].value[node-1] != 0):
-                    task = tasks[node-1]
+                if np.any(capacities[i].value[node - 1] != 0):
+                    task = tasks[node - 1]
                     assignments[i].append([task, capacities[i].value[node-1]])
                 node = np.argmax(x[i].value[node, :])
 
@@ -372,15 +375,16 @@ def routing_algorithm(world, robots, mode="random"):
                         time_matrix[j][k] = 0
 
             # Add the initial state
+            current_costs = []
             x[i].append(cp.Variable((len(demand), 1), boolean=True))
             constraints.append(cp.sum(x[i][0]) <= 1)
-            costs.append(cp.sum(cp.multiply(cp.vec(x[i][0]), original)))
+            current_costs.append(cp.sum(cp.multiply(cp.vec(x[i][0]), original)))
             capacities.append(cp.Variable((len(demand), 2), integer=True))
 
             # Loop over the other future states
             for n in range(1, N):
                 x[i].append(cp.Variable((len(demand), 1), boolean=True))
-                costs.append(cp.sum(cp.multiply(cp.pos(x[i][n - 1] + cp.transpose(x[i][n]) - 1), time_matrix)))
+                current_costs.append(cp.sum(cp.multiply(cp.pos(x[i][n - 1] + cp.transpose(x[i][n]) - 1), time_matrix)))
                 constraints.append(cp.sum(x[i][n]) == cp.sum(x[i][0]))
 
             # Add the capacities constraints
@@ -388,13 +392,16 @@ def routing_algorithm(world, robots, mode="random"):
             constraints.append(cp.sum(capacities[i], axis=1) <= 1000*cp.vec(sum(x[i])))
             constraints.append(capacities[i] >= 0)
 
+            # Add the current costs to the total costs
+            costs.append(sum(current_costs))
+
         demand = np.array(demand)
         priority = np.array(priority) * 10000
 
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, maximumSeconds=60, allowablePercentageGap=5)
+        problem.solve(verbose=True, solver=cp.CBC, logLevel=1, numberThreads=4, maximumSeconds=30, allowablePercentageGap=5)
 
         # Assign the results to the robots and evaluate the costs
         for robot_i, robot in enumerate(x):
@@ -405,11 +412,13 @@ def routing_algorithm(world, robots, mode="random"):
                 print(f"step {i + 1}: {x_i.value.T}")
 
         for i, robot in enumerate(robots):
+            visited_tasks = set()
             robot._current_node = robot.start_node
             for j, x_i in enumerate(x[i]):
                 index = np.argmax(x_i.value)
-                if np.any(capacities[i].value[index] != 0):
-                    task = tasks[index]
+                task = tasks[index]
+                if np.any(capacities[i].value[index] != 0) and task not in visited_tasks:
+                    visited_tasks.add(task)
                     assignments[i].append([task, capacities[i].value[index]])
                     robot._current_node = task
 
