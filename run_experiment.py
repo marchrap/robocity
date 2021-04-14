@@ -49,11 +49,11 @@ number_of_runs_for_random_multiple = 25
 
 """ Routing modes to analyse, comment as appropriate """
 
-routing_modes = [#"random",
-                 #"random_multiple",
-                 #"hungarian",
-                 #"linear_separate_tasks",
-                 #"linear_joined_tasks",
+routing_modes = ["random",
+                 "random_multiple",
+                 "hungarian",
+                 "linear_separate_tasks",
+                 "linear_joined_tasks",
                  "tsm",
                  "home"
                  ]
