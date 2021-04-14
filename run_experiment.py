@@ -59,8 +59,8 @@ routing_modes = [#"random",
                  ]
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
-titlestr = "routing_mode\trobot_distribution\tnumber_of_robots\tmax_demand\tflowtime\tmakespan\tscore" \
-           "\tcomputation_time\ttotal_speed_capacity\n"
+titlestr = "routing_mode\trobot_distribution\tnumber_of_robots\tmax_demand\ttotal_speed_capacity\tflowtime\tmakespan" \
+           "\tscore\tcomputation_time\n "
 
 if __name__ == "__main__":
 

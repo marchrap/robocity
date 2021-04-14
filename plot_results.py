@@ -3,13 +3,12 @@ from typing import List, Union
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 import numpy as np
 
-method_comparison_filename = "method_comparison_results20210414-125350.txt"
-robot_type_filename = "robot_type_results20210414-125350.txt"
-robot_number_filename = "robot_number_results20210414-125350.txt"
-increased_demand_filename = "increased_demand_results20210414-130145.txt"
+method_comparison_filename = "method_comparison_results_final.txt"
+robot_type_filename = "robot_type_results_final.txt"
+robot_number_filename = "robot_number_results_final.txt"
+increased_demand_filename = "increased_demand_results_final.txt"
 
 if __name__ == "__main__":
 
@@ -75,8 +74,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="hungarian")
     plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    # plt.plot(x, tsm_makespans, label="tsm")
-    # plt.plot(x, home_makespans, label="home")
+    plt.plot(x, tsm_makespans, label="tsm")
+    plt.plot(x, home_makespans, label="home")
 
     plt.xlabel("Number of robots of type 1")
     plt.ylabel("Makespan (s)")
@@ -125,7 +124,6 @@ if __name__ == "__main__":
         # print(result[0])
         if result[0] == "random":
             random_makespans.append(result[7])
-            print(result[4])
             robot_numbers.append(result[4])
         elif result[0] == "random_multiple":
             random_multiple_makespans.append(result[7])
@@ -149,8 +147,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="hungarian")
     plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    # plt.plot(x, tsm_makespans, label="tsm")
-    # plt.plot(x, home_makespans, label="home")
+    plt.plot(x, tsm_makespans, label="tsm")
+    plt.plot(x, home_makespans, label="home")
 
     plt.xlabel("Number of robots")
     plt.ylabel("Makespan (s)")
@@ -220,8 +218,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="hungarian")
     plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    # plt.plot(x, tsm_makespans, label="tsm")
-    # plt.plot(x, home_makespans, label="home")
+    plt.plot(x, tsm_makespans, label="tsm")
+    plt.plot(x, home_makespans, label="home")
 
     plt.xlabel("Max demand")
     plt.ylabel("Makespan (s)")
@@ -260,7 +258,6 @@ if __name__ == "__main__":
             # add item to the list
             results.append(result)
 
-
     print(results)
 
     makespans = []
@@ -278,12 +275,14 @@ if __name__ == "__main__":
         scores.append(result[9])
         computation_times.append(result[10])
 
+    computation_times[1] /= 30
+
     from mpl_toolkits.axes_grid1 import host_subplot
     import mpl_toolkits.axisartist as AA
 
     fig3, ax3 = plt.subplots(figsize=(12, 7.5))
     host = host_subplot(111, axes_class=AA.Axes)
-    plt.subplots_adjust(left=0.1, right=0.8, bottom=0.05, top=0.98)
+    plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9)
     par1 = host.twinx()
     par2 = host.twinx()
     par3 = host.twinx()
@@ -309,57 +308,68 @@ if __name__ == "__main__":
     host.set_ylabel("Makespan (s)")
     par1.set_ylabel("Flowspan (s)")
     par2.set_ylabel("Score")
-    par3.set_ylabel("Computation_time (s)")
+    par3.set_ylabel("Computation time (s)")
 
-    y_pos = np.arange(len(makespans))
+    y_pos = np.arange(len(makespans) - 1)
     bar_width = 0.2
     opacity = 0.8
 
-    #print(y_pos)
-    #print(makespans)
+    # print(y_pos)
+    # print(makespans)
 
     colours = ['b', 'g', 'r', 'y']
 
-    rects1 = host.bar(y_pos -1.5*bar_width, makespans, bar_width,
+    rects1 = host.bar(y_pos - 1.5 * bar_width, makespans[1:], bar_width,
                       alpha=opacity,
                       color=colours[0],
                       label='Makespan (s)')
 
-    rects2 = par1.bar(y_pos -0.5*bar_width, flowspans, bar_width,
+    for i, v in enumerate(makespans[1:]):
+        host.text(i-bar_width*1.5, v+0.01*max(makespans[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+
+    rects2 = par1.bar(y_pos - 0.5 * bar_width, flowspans[1:], bar_width,
                       alpha=opacity,
                       color=colours[1],
                       label='Flowspan (s)')
 
-    rects3 = par2.bar(y_pos +0.5*bar_width, scores, bar_width,
+    for i, v in enumerate(flowspans[1:]):
+        par1.text(i-bar_width*0.5, v+0.01*max(flowspans[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+
+    rects3 = par2.bar(y_pos + 0.5 * bar_width, scores[1:], bar_width,
                       alpha=opacity,
                       color=colours[2],
                       label='Score')
 
-    rects4 = par3.bar(y_pos +1.5*bar_width, computation_times, bar_width,
+    for i, v in enumerate(scores[1:]):
+        par2.text(i+bar_width*0.5, v+0.01*max(scores[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+
+    rects4 = par3.bar(y_pos + 1.5 * bar_width, computation_times[1:], bar_width,
                       alpha=opacity,
                       color=colours[3],
-                      label='Computation_time (s)')
+                      label='Computation time (s)')
 
-    # plt.bar(y_pos, list(zip(*conlusion_results))[1], align='center', alpha=0.75, color='blue')
-    # plt.xticks(y_pos + bar_width, list(zip(*conlusion_results))[0], rotation=90, fontsize='small')
-    # plt.yticks(fontsize="small")
+    for i, v in enumerate(computation_times[1:]):
+        par3.text(i+bar_width*1.5, v+0.01*max(computation_times[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+
+    new_labels = ["random only",
+                  "random average\n(n=2000)",
+                  "hungarian",
+                  "linear\nseparate",
+                  "linear\njoined",
+                  "tsm (60s)",
+                  "tsm (120s)",
+                  "home"]
 
     ax3.set_visible(False)
 
-    # par1.ticks.set_fontsize(fontsize="small")
-
-    """fontdict = {'fontsize': 'small',
-     'fontweight': rcParams['axes.titleweight'],
-     'verticalalignment': 'baseline',
-     'horizontalalignment': 'right'}
-    par1.set_xticks(y_pos)
-    par1.set_xticklabels(labels, fontdict)"""
-
     host.set_xticks(y_pos)
-    host.set_xticklabels(labels, fontsize=8, rotation=45)
+    host.set_xticklabels([])
 
-    # plt.xlabel("Method")
-    # plt.ylabel("Makespan (s)")
+    for label, position in zip(new_labels[1:], y_pos):
+        plt.annotate(label, (0.1+position/7.5, 0), (0, -5), xycoords='axes fraction', textcoords='offset points', va='top',
+                     ha='center')
+
+
     host.legend()
 
     host.axis["left"].label.set_color(color=colours[0])
