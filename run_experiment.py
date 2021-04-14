@@ -54,6 +54,7 @@ routing_modes = ["random",
                  "hungarian",
                  "linear_separate_tasks",
                  "linear_joined_tasks",
+                 "tsm_short"
                  "tsm",
                  "home"
                  ]
@@ -128,6 +129,8 @@ if __name__ == "__main__":
             if routing_mode == "random_multiple":
                 makespan, flowtime, score = route_multiple(world, robots, mode="random",
                                                            number_of_runs=number_of_runs_for_random_multiple)
+            elif routing_mode == "tsm_short":
+                flowtime, makespan, score = route(world, robots, mode=routing_mode, maximumSeconds=60)
             else:
                 flowtime, makespan, score = route(world, robots, mode=routing_mode)
             timer_end = time.time()
