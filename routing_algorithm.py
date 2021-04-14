@@ -402,7 +402,7 @@ def routing_algorithm(world, robots, mode="random"):
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, logLevel=1, numberThreads=4, maximumSeconds=30, allowablePercentageGap=5)
+        problem.solve(verbose=True, solver=cp.CBC, logLevel=1, numberThreads=4, maximumSeconds=60, allowablePercentageGap=5)
 
         # Assign the results to the robots and evaluate the costs
         for robot_i, robot in enumerate(x):
