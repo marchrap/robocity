@@ -59,7 +59,7 @@ def route(world, robots, mode="random"):
                     world.graph.nodes[hospital]['demand2'] = max(0, tasks[hospital][1])
                     if np.all(np.isclose(tasks[hospital], 0)):
                         del tasks[hospital]
-                else:
+                elif hospital != robots[i].start_node:
                     # Add the delivered to the robot's delivered if task not in hospitals
                     robots[i]._delivered.append(np.zeros_like(delivered))
 
