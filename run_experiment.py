@@ -130,7 +130,7 @@ if __name__ == "__main__":
                 makespan, flowtime, score = route_multiple(world, robots, mode="random",
                                                            number_of_runs=number_of_runs_for_random_multiple)
             elif routing_mode == "tsm_short":
-                flowtime, makespan, score = route(world, robots, mode=routing_mode, maximumSeconds=60)
+                flowtime, makespan, score = route(world, robots, mode="tsm", maximumSeconds=60)
             else:
                 flowtime, makespan, score = route(world, robots, mode=routing_mode)
             timer_end = time.time()
