@@ -13,7 +13,7 @@ robot object.
 """
 
 
-def route(world, robots, mode="random"):
+def route(world, robots, mode="random", maximumSeconds=120):
     """
     Routes the world demand and matches it with the robots.
 
@@ -35,7 +35,7 @@ def route(world, robots, mode="random"):
 
     while True:
         # Obtain the assignments. Those should be in the form [[hospital_id, np.array([delivered1, delivered2])],...]
-        assignments = routing_algorithm(world, robots, mode=mode)
+        assignments = routing_algorithm(world, robots, mode=mode, maximumSeconds=maximumSeconds)
         for i, robot_assignments in enumerate(assignments):
             for assignment in robot_assignments:
                 # Unwrap the assignment
@@ -100,7 +100,7 @@ def route(world, robots, mode="random"):
     return flowtime, makespan, score
 
 
-def routing_algorithm(world, robots, mode="random"):
+def routing_algorithm(world, robots, mode="random", maximumSeconds=120):
     """
     Route the world using various algorithms.
 
@@ -327,7 +327,7 @@ def routing_algorithm(world, robots, mode="random"):
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, logLevel=1, maximumSeconds=120, allowablePercentageGap=10)
+        problem.solve(verbose=True, solver=cp.CBC, numberThreads=8, logLevel=1, maximumSeconds=maximumSeconds, allowablePercentageGap=10)
 
         # Assign the results to the robots and evaluate the costs
         for i, x_i in enumerate(x):
