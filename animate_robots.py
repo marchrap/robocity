@@ -79,6 +79,10 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
     ax: existing axes
     """
 
+    # robot_sprites = []
+    # line_sprites = []
+    # plot_paths = []
+
     for robot in robots:
         path = create_path(robot, world, dt)
         plot_paths.append(path)
@@ -92,7 +96,7 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
             plt.Circle(origin, 20, color=colour, zorder=3, label=f'robot {robot.ID}, type: {robot.type}', alpha=.75))
         line_sprites.append(plt.plot([], [], color=colour, alpha=.75))
         # plt.plot(*zip(*path), color=colour, alpha=.5)
-        print("path: ",robot._node_path)
+        print("path: ", robot._node_path)
     for sprite in robot_sprites:
         ax.add_patch(sprite)
 
@@ -108,15 +112,16 @@ def animate_robots(world, robots, fig=plt.gcf(), ax=plt.gca(), dt=1):
     return ani
     # plt.show()
 
-#def progress_callback(current_frame, total_frames):
+
+# def progress_callback(current_frame, total_frames):
 #    with ShadyBar('Processing', max=total_frames) as bar:
 #        for current_frame in range(total_frames):
 #            # Do some work
 #            bar.next()
 
 
-#bar = IncrementalBar('Processing', max=max([len(x) for x in plot_paths]))
+# bar = IncrementalBar('Processing', max=max([len(x) for x in plot_paths]))
 
 
 def progress_bar(current_frame, total_frames):
-    print("Frame {}/{}".format(current_frame+1, total_frames))
+    print("Frame {}/{}".format(current_frame + 1, total_frames))

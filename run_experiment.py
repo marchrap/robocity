@@ -10,9 +10,9 @@ from math import ceil
 """ Select experiments """
 
 test_methods = 1
-test_varying_robot_types = 1
-test_varying_robot_numbers = 1
-test_demand_changes = 1
+test_varying_robot_types = 0
+test_varying_robot_numbers = 0
+test_demand_changes = 0
 
 """
 test_methods:
@@ -49,11 +49,11 @@ number_of_runs_for_random_multiple = 25
 
 """ Routing modes to analyse, comment as appropriate """
 
-routing_modes = [#"random",
-                 #"random_multiple",
-                 #"hungarian",
-                 #"linear_separate_tasks",
-                 #"linear_joined_tasks",
+routing_modes = ["random",
+                 "random_multiple",
+                 "hungarian",
+                 "linear_separate_tasks",
+                 "linear_joined_tasks",
                  "tsm",
                  "home"
                  ]

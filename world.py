@@ -90,16 +90,18 @@ class World:
                 node_colors.append("#00000000")
 
         # Plot the graph
+        print("Hey 4")
         ox.plot_graph(self.graph, ax=ax, node_color=node_colors, node_size=80, show=False)
+        print("Hey 5")
 
         # Plot the text for the hospitals
         for node in self.hospitals:
             pointer = self.graph.nodes[node]
 
-            print(pointer['x'], pointer['y'] )
-            plt.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",
-                         xy=(pointer['x']+100, pointer['y']-20), color='black',
-                         bbox=dict(facecolor='white', alpha=0.75, edgecolor='white'))
+            print(pointer['x'], pointer['y'])
+            ax.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",
+                        xy=(pointer['x'] + 100, pointer['y'] - 20), color='black',
+                        bbox=dict(facecolor='white', alpha=0.75, edgecolor='white'))
 
             # Show the plot if required
         if show:
