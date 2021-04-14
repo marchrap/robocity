@@ -15,7 +15,7 @@ class World:
         the graph of the whole world
     """
 
-    def __init__(self, number_of_warehouses=1, number_of_hospitals=15, seed=3):
+    def __init__(self, number_of_warehouses=1, number_of_hospitals=15, seed=3, max_demand=3):
         """
         Initializer of the function. There are three types of nodes. (0) is a hospital, (1) a warehouse and (2) anything
         else, like cross roads.
@@ -51,8 +51,8 @@ class World:
             if node in random_hospital_locations:
                 # Hospitals
                 pointer['type'] = 0
-                pointer['demand1'] = np.random.randint(3)  # Going to change this to between 0 and 1 for now
-                pointer['demand2'] = np.random.randint(3)
+                pointer['demand1'] = np.random.randint(max_demand)  # Going to change this to between 0 and 1 for now
+                pointer['demand2'] = np.random.randint(max_demand)
                 pointer['priority'] = np.random.randint(1, 3)
 
                 pointer['init_demand1'] = pointer['demand1']

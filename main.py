@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("\n\t Running in", routing_mode, "routing mode with", number_of_robots, "robots.")
 
     print("\n\t Initialising world...")
-    world = World(number_of_hospitals=15)
+    world = World(number_of_hospitals=15, max_demand=3)
 
     # Initialize the robots in random warehouses
     robots = []
@@ -84,6 +84,8 @@ if __name__ == "__main__":
                  backgroundcolor='white')
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
+
+    plt.tight_layout()
 
     print("\n\t Robots routed with assignment_cost of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)

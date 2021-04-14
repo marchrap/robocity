@@ -65,7 +65,7 @@ def route(world, robots, mode="random"):
 
             # Append the path to the origin
             robots[i]._node_path.append(robots[i]._start_node)
-        #print(tasks)
+        # print(tasks)
         if len(tasks.keys()) == 0:
             break
 
@@ -124,7 +124,7 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Assign robots to tasks until there are none left
         while len(tasks) > 0:
-            #print("Remaining tasks: ", tasks)
+            # print("Remaining tasks: ", tasks)
             for i, robot in enumerate(robots):
                 if len(tasks) == 0:
                     break
@@ -161,8 +161,8 @@ def routing_algorithm(world, robots, mode="random"):
 
         for i, index in enumerate(robot_ind):
             task = tasks[task_ind[i]]
-            assignments[i].append([task[0], np.array([(1-task[1])*robots[index].capacity,
-                                                      task[1]*robots[index].capacity])])
+            assignments[i].append([task[0], np.array([(1 - task[1]) * robots[index].capacity,
+                                                      task[1] * robots[index].capacity])])
 
     elif mode == "linear_separate_tasks":
         # Takes all the tasks as separate tasks, i.e. does not join them together and the robot only delivers one type
@@ -197,7 +197,7 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Change the demand and priority arrays to numpy ones
         demand = np.array(demand)
-        priority = np.array(priority)*10000
+        priority = np.array(priority) * 10000
 
         # Define the optimization problem
         x = cp.Variable((len(robots), len(demand)), boolean=True)
@@ -214,7 +214,7 @@ def routing_algorithm(world, robots, mode="random"):
             j = nonzero[0][index]
             robot = robots[j]
             task = tasks[i]
-            assignments[j].append([task, np.array([(1-types[i])*robot.capacity, types[i]*robot.capacity])])
+            assignments[j].append([task, np.array([(1 - types[i]) * robot.capacity, types[i] * robot.capacity])])
 
     elif mode == "linear_joined_tasks":
         # As above but allows the robots to deliver two goods at the same time
@@ -249,7 +249,8 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Define the optimization problem
         x = cp.Variable((len(robots), len(demand)), boolean=True)
-        cost = cp.sum(cp.multiply(T, x)) + cp.sum(cp.neg(cp.multiply(cp.matmul(cp.transpose(x), capacity) - demand, priority)))
+        cost = cp.sum(cp.multiply(T, x)) + cp.sum(
+            cp.neg(cp.multiply(cp.matmul(cp.transpose(x), capacity) - demand, priority)))
         objective = cp.Minimize(cost)
         inequality = [cp.sum(x, axis=1) <= 1]
         problem = cp.Problem(objective, inequality)
@@ -257,7 +258,7 @@ def routing_algorithm(world, robots, mode="random"):
 
         # Assign the results to the robots and evaluate the costs
         nonzero = x.value.nonzero()
-        #print(nonzero)
+        # print(nonzero)
         for index in range(len(nonzero[0])):
             i = nonzero[1][index]
             j = nonzero[0][index]
@@ -300,7 +301,7 @@ def routing_algorithm(world, robots, mode="random"):
             constraints.append(z[i] - cp.transpose(z[i]) + len(demand) * x[i][1:, 1:] <= len(demand) - 1)
             constraints.append(cp.sum(x[i], axis=1) <= cp.sum(x[i][0, :]))  # We start from 0th node
             constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
-            constraints.append(cp.sum(capacities[i], axis=1) <= 1000*v[i][1:])  # Check how many units are delivered
+            constraints.append(cp.sum(capacities[i], axis=1) <= 1000 * v[i][1:])  # Check how many units are delivered
             constraints.append(capacities[i] >= 0)
 
             # Fill in the distance matrix
@@ -389,7 +390,7 @@ def routing_algorithm(world, robots, mode="random"):
 
             # Add the capacities constraints
             constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
-            constraints.append(cp.sum(capacities[i], axis=1) <= 1000*cp.vec(sum(x[i])))
+            constraints.append(cp.sum(capacities[i], axis=1) <= 1000 * cp.vec(sum(x[i])))
             constraints.append(capacities[i] >= 0)
 
             # Add the current costs to the total costs
@@ -447,14 +448,22 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
 
     flowtimes = []
     makespans = []
+    scores = []
     for i in range(number_of_runs):
-        print(f"Run number {i + 1}")
-        flowtime, makespan = route(copy.deepcopy(world), copy.deepcopy(robots), mode)
+        print(f"Random run number {i + 1}")
+        flowtime, makespan, score = route(copy.deepcopy(world), copy.deepcopy(robots), mode)
         flowtimes.append(flowtime)
         makespans.append(makespan)
+        scores.append(score)
 
-    mean_assignment_cost = sum(makespans) / len(makespans)
-    print("Average random maketime: ", round(mean_assignment_cost, 2))
+    mean_makespan = sum(makespans) / len(makespans)
+    print("Average random maketime: ", round(mean_makespan, 2))
+
+    mean_flowtime = sum(flowtimes) / len(flowtimes)
+    print("Average random maketime: ", round(mean_flowtime, 2))
+
+    mean_score = sum(scores) / len(scores)
+    print("Average random maketime: ", round(mean_score, 2))
 
     with open('random_assignment_costs{}.txt'.format(number_of_runs), 'w') as filehandle:
         for listitem in makespans:
@@ -474,6 +483,6 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
     axs.yaxis.set_major_formatter(PercentFormatter(xmax=len(makespans)))
     axs.set_ylabel('Occurance')
     axs.set_xlabel('Maketime')
-    plt.annotate("Mean assignment cost: %s" % mean_assignment_cost, xy=(0.05, 0.95), xycoords='axes fraction')
+    plt.annotate("Mean assignment cost: %s" % mean_makespan, xy=(0.05, 0.95), xycoords='axes fraction')
 
-    return mean_assignment_cost
+    return mean_makespan, mean_flowtime, mean_score
