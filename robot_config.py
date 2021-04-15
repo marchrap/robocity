@@ -57,9 +57,6 @@ class Robot:
         # Set up the fuel drain rate, the same for all types as we assume engines are the same
         # self._drainrate = self.get_drainrate()
 
-    # def node_move(self, start_node, end_node):
-    #     self._position = end_node.position      """Need to check that this is what Marcin has done!"""
-
     def move(self, start_position, end_position):
         self._position = end_position
         # Could also return a distance here because why not
