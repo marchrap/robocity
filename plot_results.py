@@ -382,7 +382,7 @@ if __name__ == "__main__":
                      va='top',
                      ha='center')
 
-    host.legend()
+    host.legend(loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.12))
 
     host.axis["left"].label.set_color(color=colours[0])
     par1.axis["right"].label.set_color(color=colours[1])
