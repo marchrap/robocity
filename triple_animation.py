@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib as mpl
 import time
 
-routing_modes = [#"random",
-                 #"hungarian",
+routing_modes = ["random",
+                 "hungarian",
                  #"linear_separate_tasks",
                  #"linear_joined_tasks",
                  # "tsm",
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.1)
 
-    # print("Saving render...")
-    # render = ani.save("animation%s.mp4" % timestr, fps=100, progress_callback=progress_bar)
+    print("Saving render...")
+    render = ani.save("animation%s.mp4" % timestr, fps=100, progress_callback=progress_bar)
 
     plt.show()

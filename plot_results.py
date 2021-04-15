@@ -69,13 +69,13 @@ if __name__ == "__main__":
 
     fig1, ax1 = plt.subplots()
     x = list(zip(*robot_configs))[0]
-    plt.plot(x, random_makespans, label="random")
-    plt.plot(x, random_multiple_makespans, label="random_multiple")
-    plt.plot(x, hungarian_makespans, label="hungarian")
-    plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    plt.plot(x, tsm_makespans, label="tsm")
-    plt.plot(x, home_makespans, label="home")
+    # plt.plot(x, random_makespans, label="random")
+    plt.plot(x, random_multiple_makespans, label="Random")
+    plt.plot(x, hungarian_makespans, label="Hungarian")
+    # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
+    plt.plot(x, linear_joined_tasks_makespans, label="Binary")
+    plt.plot(x, tsm_makespans, label="mStep")
+    plt.plot(x, home_makespans, label="mTSM")
 
     plt.xlabel("Number of robots of type 1")
     plt.ylabel("Makespan (s)")
@@ -142,13 +142,13 @@ if __name__ == "__main__":
     x = robot_numbers
     y = random_makespans
 
-    plt.plot(x, random_makespans, label="random")
-    plt.plot(x, random_multiple_makespans, label="random_multiple")
-    plt.plot(x, hungarian_makespans, label="hungarian")
-    plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    plt.plot(x, tsm_makespans, label="tsm")
-    plt.plot(x, home_makespans, label="home")
+    # plt.plot(x, random_makespans, label="random")
+    plt.plot(x, random_multiple_makespans, label="Random")
+    plt.plot(x, hungarian_makespans, label="Hungarian")
+    # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
+    plt.plot(x, linear_joined_tasks_makespans, label="Binary")
+    plt.plot(x, tsm_makespans, label="mStep")
+    plt.plot(x, home_makespans, label="mTSM")
 
     plt.xlabel("Number of robots")
     plt.ylabel("Makespan (s)")
@@ -213,13 +213,13 @@ if __name__ == "__main__":
     x = max_demands
     y = random_makespans
 
-    plt.plot(x, random_makespans, label="random")
-    plt.plot(x, random_multiple_makespans, label="random_multiple")
-    plt.plot(x, hungarian_makespans, label="hungarian")
-    plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(x, linear_joined_tasks_makespans, label="linear_joined_tasks")
-    plt.plot(x, tsm_makespans, label="tsm")
-    plt.plot(x, home_makespans, label="home")
+    # plt.plot(x, random_makespans, label="random")
+    plt.plot(x, random_multiple_makespans, label="Random")
+    plt.plot(x, hungarian_makespans, label="Hungarian")
+    # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
+    plt.plot(x, linear_joined_tasks_makespans, label="Binary")
+    plt.plot(x, tsm_makespans, label="mStep")
+    plt.plot(x, home_makespans, label="mTSM")
 
     plt.xlabel("Max demand")
     plt.ylabel("Makespan (s)")
@@ -232,10 +232,10 @@ if __name__ == "__main__":
     conlusion_results = [["Random baseline(n=2000)", 4045.34],
                          ["Hungarianish", 2421.16],
                          ["linear_separate_tasks", 2071.02],
-                         ["linear_joined_tasks", 1430.11],
-                         ["tsm(60s)", 2137.76],
-                         ["tsm(120s)", 829.40],
-                         ["home", 829.40]]
+                         ["Binary", 1430.11],
+                         ["mStep(60s)", 2137.76],
+                         ["mStep(120s)", 829.40],
+                         ["mTSM", 829.40]]
 
     with open(method_comparison_filename, 'r') as filehandle:
         results = []
@@ -306,7 +306,7 @@ if __name__ == "__main__":
     par3.axis["right"].toggle(all=True)
 
     host.set_ylabel("Makespan (s)")
-    par1.set_ylabel("Flowspan (s)")
+    par1.set_ylabel("Flowtime (s)")
     par2.set_ylabel("Score")
     par3.set_ylabel("Computation time (s)")
 
@@ -319,56 +319,68 @@ if __name__ == "__main__":
 
     colours = ['b', 'g', 'r', 'y']
 
-    rects1 = host.bar(y_pos - 1.5 * bar_width, makespans[1:], bar_width,
+    l = makespans
+    l = l[1:3] + l[4:]
+
+    y_pos = np.arange(len(l))
+
+    rects1 = host.bar(y_pos - 1.5 * bar_width, l, bar_width,
                       alpha=opacity,
                       color=colours[0],
                       label='Makespan (s)')
 
-    for i, v in enumerate(makespans[1:]):
-        host.text(i-bar_width*1.5, v+0.01*max(makespans[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+    for i, v in enumerate(l):
+        host.text(i - bar_width * 1.5, v + 0.01 * max(l), str(round(v, 2)), ha='center', va='bottom', rotation=90)
 
-    rects2 = par1.bar(y_pos - 0.5 * bar_width, flowspans[1:], bar_width,
+    l = flowspans
+    l = l[1:3] + l[4:]
+    rects2 = par1.bar(y_pos - 0.5 * bar_width, l, bar_width,
                       alpha=opacity,
                       color=colours[1],
-                      label='Flowspan (s)')
+                      label='Flowtime (s)')
 
-    for i, v in enumerate(flowspans[1:]):
-        par1.text(i-bar_width*0.5, v+0.01*max(flowspans[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+    for i, v in enumerate(l):
+        par1.text(i - bar_width * 0.5, v + 0.01 * max(l), str(round(v, 2)), ha='center', va='bottom', rotation=90)
 
-    rects3 = par2.bar(y_pos + 0.5 * bar_width, scores[1:], bar_width,
+    l = scores
+    l = l[1:3] + l[4:]
+    rects3 = par2.bar(y_pos + 0.5 * bar_width, l, bar_width,
                       alpha=opacity,
                       color=colours[2],
                       label='Score')
 
-    for i, v in enumerate(scores[1:]):
-        par2.text(i+bar_width*0.5, v+0.01*max(scores[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+    for i, v in enumerate(l):
+        par2.text(i + bar_width * 0.5, v + 0.01 * max(l), str(round(v, 2)), ha='center', va='bottom', rotation=90)
 
-    rects4 = par3.bar(y_pos + 1.5 * bar_width, computation_times[1:], bar_width,
+    l = computation_times
+    l = l[1:3] + l[4:]
+    rects4 = par3.bar(y_pos + 1.5 * bar_width, l, bar_width,
                       alpha=opacity,
                       color=colours[3],
                       label='Computation time (s)')
 
-    for i, v in enumerate(computation_times[1:]):
-        par3.text(i+bar_width*1.5, v+0.01*max(computation_times[1:]), str(round(v,2)), ha='center', va='bottom', rotation=90)
+    for i, v in enumerate(l):
+        par3.text(i + bar_width * 1.5, v + 0.01 * max(l), str(round(v, 2)), ha='center', va='bottom', rotation=90)
 
-    new_labels = ["random only",
-                  "random average\n(n=2000)",
-                  "hungarian",
-                  "linear\nseparate",
-                  "linear\njoined",
-                  "tsm (60s)",
-                  "tsm (120s)",
-                  "home"]
+    new_labels = [  # "random only",
+        "Random average\n(n=2000)",
+        "Hungarian",
+        # "linear\nseparate",
+        "Binary",
+        "mStep (60s)",
+        "mStep (540s)",
+        "mTSM (60s)"]
 
     ax3.set_visible(False)
 
     host.set_xticks(y_pos)
     host.set_xticklabels([])
 
-    for label, position in zip(new_labels[1:], y_pos):
-        plt.annotate(label, (0.1+position/7.5, 0), (0, -5), xycoords='axes fraction', textcoords='offset points', va='top',
+    #for label, position in zip(new_labels, y_pos):
+    for position, label in enumerate(new_labels):
+        host.annotate(label, ((position+0.5)/len(new_labels), 0), (0, -5), xycoords='axes fraction', textcoords='offset points',
+                     va='top',
                      ha='center')
-
 
     host.legend()
 
