@@ -9,8 +9,8 @@ from math import ceil
 
 """ Select experiments """
 
-test_methods = 1
-test_varying_robot_types = 0
+test_methods = 0
+test_varying_robot_types = 1
 test_varying_robot_numbers = 0
 test_demand_changes = 0
 
@@ -45,23 +45,23 @@ maximum_maximum_hospital_demand = 30
 maximum_hospital_demand_step = 1
 
 """ Used in all tests """
-number_of_runs_for_random_multiple = 25
+number_of_runs_for_random_multiple = 5
 
 """ Routing modes to analyse, comment as appropriate """
 
-routing_modes = ["random",
-                 "random_multiple",
-                 "hungarian",
-                 "linear_separate_tasks",
-                 "linear_joined_tasks",
-                 "tsm_short",
+routing_modes = [#"random",
+                 #"random_multiple",
+                 #"hungarian",
+                 #"linear_separate_tasks",
+                 #"linear_joined_tasks",
+                 #"tsm_short",
                  "tsm",
                  "home"
                  ]
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
 titlestr = "routing_mode\trobot_distribution\tnumber_of_robots\tmax_demand\ttotal_speed_capacity\tflowtime\tmakespan" \
-           "\tscore\tcomputation_time\n "
+           "\tscore\tcomputation_time\n"
 
 if __name__ == "__main__":
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
                 print("\n\t Initialising world...")
                 bar.update(itr)
                 itr += 1
-                world = World(number_of_hospitals=15)
+                world = World(number_of_hospitals=15, max_demand=20)
 
                 # Initialize the robots in the warehouse
                 robots = []

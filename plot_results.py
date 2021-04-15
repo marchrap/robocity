@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 method_comparison_filename = "method_comparison_results20210414-233335.txt"
-robot_type_filename = "robot_type_results_final.txt"
+robot_type_filename = "robot_type_results20210415-163406.txt"
 robot_number_filename = "robot_number_results_final.txt"
 increased_demand_filename = "increased_demand_results_final.txt"
 
@@ -53,9 +53,9 @@ if __name__ == "__main__":
         # print(result[0])
         if result[0] == "random":
             random_makespans.append(result[7])
-            robot_configs.append((result[1], result[2]))
         elif result[0] == "random_multiple":
             random_multiple_makespans.append(result[7])
+            robot_configs.append((result[1], result[2]))
         elif result[0] == "hungarian":
             hungarian_makespans.append(result[7])
         elif result[0] == "linear_separate_tasks":
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="Hungarian")
     # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    plt.plot(x, tsm_makespans, label="mStep")
-    plt.plot(x, home_makespans, label="mTSM")
+    #plt.plot(x, tsm_makespans, label="mStep")
+    #plt.plot(x, home_makespans, label="mTSM")
 
     plt.xlabel("Number of robots of type 1")
     plt.ylabel("Makespan (s)")

@@ -9,19 +9,24 @@ import time
 
 routing_modes = ["random",
                  "hungarian",
-                 "linear_separate_tasks",
+                 #"linear_separate_tasks",
                  "linear_joined_tasks",
                  #"tsm",
                  #"home"
-                 "imported"
+                 #"imported"
                  ]
 
-labels = ["Random", "Hungarian", "Separate", "Binary", "mStep"]
+labels = ["Random",
+          "Hungarian",
+          #"Separate",
+          "Binary",
+          #"mStep"
+          ]
 
 robot_types = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
 import_file = "robot_path20210415-100223.txt"
-
-dt = 3
+f an
+dt = 30
 
 if __name__ == "__main__":
 
@@ -37,7 +42,7 @@ if __name__ == "__main__":
     for index, routing_mode in enumerate(routing_modes):
 
         robots = []
-        world = World()
+        world = World(max_demand=20)
 
         for i in range(10):
             robot = Robot(np.array([0, 0]), i, robot_type=robot_types[i])
