@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 method_comparison_filename = "method_comparison_results20210414-233335.txt"
-robot_type_filename = "robot_type_results20210415-163406.txt"
+robot_type_filename = "robot_type_results20210415-191420.txt"
 robot_number_filename = "robot_number_results_final.txt"
 increased_demand_filename = "increased_demand_results_final.txt"
 
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="Hungarian")
     # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    #plt.plot(x, tsm_makespans, label="mStep")
-    #plt.plot(x, home_makespans, label="mTSM")
+    plt.plot(x, tsm_makespans, label="mTSM")
+    plt.plot(x, home_makespans, label="mStep")
 
     plt.xlabel("Number of robots of type 1")
     plt.ylabel("Makespan (s)")
@@ -147,8 +147,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="Hungarian")
     # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    plt.plot(x, tsm_makespans, label="mStep")
-    plt.plot(x, home_makespans, label="mTSM")
+    plt.plot(x, tsm_makespans, label="mTSM")
+    plt.plot(x, home_makespans, label="mStep")
 
     plt.xlabel("Number of robots")
     plt.ylabel("Makespan (s)")
@@ -218,8 +218,8 @@ if __name__ == "__main__":
     plt.plot(x, hungarian_makespans, label="Hungarian")
     # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
     plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    plt.plot(x, tsm_makespans, label="mStep")
-    plt.plot(x, home_makespans, label="mTSM")
+    plt.plot(x, tsm_makespans, label="mTSM")
+    plt.plot(x, home_makespans, label="mStep")
 
     plt.xlabel("Max demand")
     plt.ylabel("Makespan (s)")
@@ -233,9 +233,9 @@ if __name__ == "__main__":
                          ["Hungarianish", 2421.16],
                          ["linear_separate_tasks", 2071.02],
                          ["Binary", 1430.11],
-                         ["mStep(60s)", 2137.76],
-                         ["mStep(120s)", 829.40],
-                         ["mTSM", 829.40]]
+                         ["mTSM(60s)", 2137.76],
+                         ["mTSM(120s)", 829.40],
+                         ["mStep", 829.40]]
 
     with open(method_comparison_filename, 'r') as filehandle:
         results = []
@@ -367,9 +367,9 @@ if __name__ == "__main__":
         "Hungarian",
         # "linear\nseparate",
         "Binary",
-        "mStep (60s)",
-        "mStep (540s)",
-        "mTSM (60s)"]
+        "mTSM (60s)",
+        "mTSM (540s)",
+        "mStep (60s)"]
 
     ax3.set_visible(False)
 

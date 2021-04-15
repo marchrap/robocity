@@ -25,7 +25,7 @@ labels = ["Random",
 
 robot_types = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
 import_file = "robot_path20210415-100223.txt"
-f an
+
 dt = 30
 
 if __name__ == "__main__":
