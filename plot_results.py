@@ -5,7 +5,7 @@ from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
-method_comparison_filename = "method_comparison_results_final.txt"
+method_comparison_filename = "method_comparison_results20210414-233335.txt"
 robot_type_filename = "robot_type_results_final.txt"
 robot_number_filename = "robot_number_results_final.txt"
 increased_demand_filename = "increased_demand_results_final.txt"

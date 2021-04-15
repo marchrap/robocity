@@ -23,7 +23,7 @@ routing_mode options:
 """
 
 routing_mode = "hungarian"
-number_of_runs = 2000
+number_of_runs = 200
 
 
 # time-step for euler integration plotting

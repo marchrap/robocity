@@ -9,17 +9,17 @@ import time
 
 routing_modes = ["random",
                  "hungarian",
-                 #"linear_separate_tasks",
-                 #"linear_joined_tasks",
-                 # "tsm",
-                 # "home"
+                 "linear_separate_tasks",
+                 "linear_joined_tasks",
+                 #"tsm",
+                 #"home"
                  "imported"
                  ]
 
-labels = ["Hungarian", "Binary", "mStep"]
+labels = ["Random", "Hungarian", "Separate", "Binary", "mStep"]
 
 robot_types = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-import_file = "robot_path20210414-233314.txt"
+import_file = "robot_path20210415-100223.txt"
 
 dt = 3
 
@@ -52,6 +52,7 @@ if __name__ == "__main__":
                     line_list = line.split('\t')
                     print(line_list)
                     if j == 0:
+                        routing_mode = line_list[1]
                         assignment_cost = float(line_list[3])
                         computation_time = float(line_list[5])
                     else:
@@ -85,7 +86,7 @@ if __name__ == "__main__":
         ani = animate_robots(world, robots, fig, ax, dt)
         ax.legend()
 
-        ax.annotate("Routing method: %s" % routing_mode, xy=(0.05, 0.95), xycoords='axes fraction',
+        ax.annotate("Routing method: %s" % labels[index], xy=(0.05, 0.95), xycoords='axes fraction',
                     backgroundcolor='white')
         ax.annotate("Makespan: %.2f s" % assignment_cost, xy=(0.05, 0.90), xycoords='axes fraction',
                     backgroundcolor='white')

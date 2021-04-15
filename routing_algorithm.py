@@ -7,6 +7,8 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
 import copy
+from statistics import pvariance
+
 """
 Takes the world and robots and creates routes for the robots, adding them to the path_of_node_integers list in each
 robot object.
@@ -462,13 +464,13 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
         scores.append(score)
 
     mean_makespan = sum(makespans) / len(makespans)
-    print("Average random maketime: ", round(mean_makespan, 2))
+    print("Average random makespan: ", round(mean_makespan, 2))
 
     mean_flowtime = sum(flowtimes) / len(flowtimes)
-    print("Average random maketime: ", round(mean_flowtime, 2))
+    print("Average random flowtime: ", round(mean_flowtime, 2))
 
     mean_score = sum(scores) / len(scores)
-    print("Average random maketime: ", round(mean_score, 2))
+    print("Average random score: ", round(mean_score, 2))
 
     with open('random_assignment_costs{}.txt'.format(number_of_runs), 'w') as filehandle:
         for listitem in makespans:
@@ -489,5 +491,7 @@ def route_multiple(world, robots, mode="random", number_of_runs=1):
     axs.set_ylabel('Occurance')
     axs.set_xlabel('Maketime')
     plt.annotate("Mean assignment cost: %s" % mean_makespan, xy=(0.05, 0.95), xycoords='axes fraction')
+
+    print("random_multiple variance: ",pvariance(makespans))
 
     return mean_makespan, mean_flowtime, mean_score
