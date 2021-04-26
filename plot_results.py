@@ -1,5 +1,8 @@
 from typing import List, Union
 
+from mpl_toolkits.axes_grid1 import host_subplot
+import mpl_toolkits.axisartist as AA
+
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
@@ -37,7 +40,7 @@ if __name__ == "__main__":
             # add item to the list
             results.append(result)
 
-    print(results)
+    #print(results)
 
     robot_configs = []
     random_makespans = []
@@ -108,7 +111,7 @@ if __name__ == "__main__":
 
     length = max(map(len, results))
 
-    print(results)
+    #print(results)
 
     robot_numbers = []
     random_makespans = []
@@ -119,40 +122,64 @@ if __name__ == "__main__":
     tsm_makespans = []
     home_makespans = []
 
+    random_computations = []
+    random_multiple_computations = []
+    hungarian_computations = []
+    linear_separate_tasks_computations = []
+    linear_joined_tasks_computations = []
+    tsm_computations = []
+    home_computations = []
+
     for result in results:
         # print(result)
         # print(result[0])
         if result[0] == "random":
             random_makespans.append(result[7])
+            random_computations.append(result[10])
             robot_numbers.append(result[4])
         elif result[0] == "random_multiple":
             random_multiple_makespans.append(result[7])
+            random_multiple_computations.append(result[10])
         elif result[0] == "hungarian":
             hungarian_makespans.append(result[7])
+            hungarian_computations.append(result[10])
         elif result[0] == "linear_separate_tasks":
             linear_separate_tasks_makespans.append(result[7])
+            linear_separate_tasks_computations.append(result[10])
         elif result[0] == "linear_joined_tasks":
             linear_joined_tasks_makespans.append(result[7])
+            linear_joined_tasks_computations.append(result[10])
         elif result[0] == "tsm":
             tsm_makespans.append(result[7])
+            tsm_computations.append(result[10])
         elif result[0] == "home":
             home_makespans.append(result[7])
+            home_computations.append(result[10])
 
     fig2, ax2 = plt.subplots()
+
     x = robot_numbers
     y = random_makespans
 
-    # plt.plot(x, random_makespans, label="random")
-    plt.plot(x, random_multiple_makespans, label="Random")
-    plt.plot(x, hungarian_makespans, label="Hungarian")
-    # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    plt.plot(x, tsm_makespans, label="mTSM")
-    plt.plot(x, home_makespans, label="mStep")
+    ax2.plot(x, random_multiple_makespans, label="Random")
+    ax2.plot(x, hungarian_makespans, label="Hungarian")
+    ax2.plot(x, linear_joined_tasks_makespans, label="Binary")
+    ax2.plot(x, tsm_makespans, label="mTSM")
+    ax2.plot(x, home_makespans, label="mStep")
 
-    plt.xlabel("Number of robots")
-    plt.ylabel("Makespan (s)")
-    plt.legend()
+    ax2_1 = ax2.twinx()
+
+    ax2_1.plot(x, random_multiple_computations, label="Random", alpha=0.5, color=ax2.lines[0].get_color())
+    ax2_1.plot(x, hungarian_computations, label="Hungarian", alpha=0.5, color=ax2.lines[1].get_color())
+    ax2_1.plot(x, linear_joined_tasks_computations, label="Binary", alpha=0.5, color=ax2.lines[2].get_color())
+    ax2_1.plot(x, tsm_computations, label="mTSM", alpha=0.5, color=ax2.lines[3].get_color())
+    ax2_1.plot(x, home_computations, label="mStep", alpha=0.5, color=ax2.lines[4].get_color())
+
+    ax2_1.set_ylabel("Computation time (s, faded)")
+
+    ax2.set_xlabel("Number of robots")
+    ax2.set_ylabel("Makespan (s)")
+    ax2.legend()
 
     """
     Now increase demand.
@@ -179,7 +206,7 @@ if __name__ == "__main__":
             # add item to the list
             results.append(result)
 
-    print(results)
+    #print(results)
 
     max_demands = []
     random_makespans = []
@@ -190,40 +217,65 @@ if __name__ == "__main__":
     tsm_makespans = []
     home_makespans = []
 
+    random_computations = []
+    random_multiple_computations = []
+    hungarian_computations = []
+    linear_separate_tasks_computations = []
+    linear_joined_tasks_computations = []
+    tsm_computations = []
+    home_computations = []
+
     for result in results:
         # print(result)
         # print(result[0])
         if result[0] == "random":
             random_makespans.append(result[7])
+            random_computations.append(result[10])
             max_demands.append(result[5])
         elif result[0] == "random_multiple":
             random_multiple_makespans.append(result[7])
+            random_multiple_computations.append(result[10])
         elif result[0] == "hungarian":
             hungarian_makespans.append(result[7])
+            hungarian_computations.append(result[10])
         elif result[0] == "linear_separate_tasks":
             linear_separate_tasks_makespans.append(result[7])
+            linear_separate_tasks_computations.append(result[10])
         elif result[0] == "linear_joined_tasks":
             linear_joined_tasks_makespans.append(result[7])
+            linear_joined_tasks_computations.append(result[10])
         elif result[0] == "tsm":
             tsm_makespans.append(result[7])
+            tsm_computations.append(result[10])
         elif result[0] == "home":
             home_makespans.append(result[7])
+            home_computations.append(result[10])
 
-    fig2, ax2 = plt.subplots()
+    fig3, ax3 = plt.subplots()
     x = max_demands
     y = random_makespans
 
     # plt.plot(x, random_makespans, label="random")
-    plt.plot(x, random_multiple_makespans, label="Random")
-    plt.plot(x, hungarian_makespans, label="Hungarian")
+    ax3.plot(x, random_multiple_makespans, label="Random")
+    ax3.plot(x, hungarian_makespans, label="Hungarian")
     # plt.plot(x, linear_separate_tasks_makespans, label="linear_separate_tasks")
-    plt.plot(x, linear_joined_tasks_makespans, label="Binary")
-    plt.plot(x, tsm_makespans, label="mTSM")
-    plt.plot(x, home_makespans, label="mStep")
+    ax3.plot(x, linear_joined_tasks_makespans, label="Binary")
+    ax3.plot(x, tsm_makespans, label="mTSM")
+    ax3.plot(x, home_makespans, label="mStep")
 
-    plt.xlabel("Max demand")
-    plt.ylabel("Makespan (s)")
-    plt.legend()
+    ax3_1 = ax3.twinx()
+
+    ax3_1.plot(x, random_multiple_computations, label="Random", alpha=0.5, color=ax3.lines[0].get_color())
+    ax3_1.plot(x, hungarian_computations, label="Hungarian", alpha=0.5, color=ax3.lines[1].get_color())
+    ax3_1.plot(x, linear_joined_tasks_computations, label="Binary", alpha=0.5, color=ax3.lines[2].get_color())
+    ax3_1.plot(x, tsm_computations, label="mTSM", alpha=0.5, color=ax3.lines[3].get_color())
+    ax3_1.plot(x, home_computations, label="mStep", alpha=0.5, color=ax3.lines[4].get_color())
+
+    ax3_1.set_ylabel("Computation time (s, faded)")
+
+    ax3.set_xlabel("Max demand")
+    ax3.set_ylabel("Makespan (s)")
+    ax3.legend()
 
     """
     Plot bar chart of methods on standard 15 hospital, 10 robot, world.
@@ -258,7 +310,7 @@ if __name__ == "__main__":
             # add item to the list
             results.append(result)
 
-    print(results)
+    #print(results)
 
     makespans = []
     flowspans = []
@@ -277,10 +329,7 @@ if __name__ == "__main__":
 
     computation_times[1] /= 30
 
-    from mpl_toolkits.axes_grid1 import host_subplot
-    import mpl_toolkits.axisartist as AA
-
-    fig3, ax3 = plt.subplots(figsize=(12, 7.5))
+    fig4, ax4 = plt.subplots(figsize=(12, 7.5))
     host = host_subplot(111, axes_class=AA.Axes)
     plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9)
     par1 = host.twinx()
@@ -306,9 +355,13 @@ if __name__ == "__main__":
     par3.axis["right"].toggle(all=True)
 
     host.set_ylabel("Makespan (s)")
+    host.set_ylim(top=max(makespans) * 1.15)
     par1.set_ylabel("Flowtime (s)")
+    par1.set_ylim(top=max(flowspans) * 1.15)
     par2.set_ylabel("Score")
+    par2.set_ylim(top=max(scores) * 1.15)
     par3.set_ylabel("Computation time (s)")
+    par3.set_ylim(top=max(computation_times) * 1.15)
 
     y_pos = np.arange(len(makespans) - 1)
     bar_width = 0.2
@@ -371,16 +424,17 @@ if __name__ == "__main__":
         "mTSM (540s)",
         "mStep (60s)"]
 
-    ax3.set_visible(False)
+    ax4.set_visible(False)
 
     host.set_xticks(y_pos)
     host.set_xticklabels([])
 
-    #for label, position in zip(new_labels, y_pos):
+    # for label, position in zip(new_labels, y_pos):
     for position, label in enumerate(new_labels):
-        host.annotate(label, ((position+0.5)/len(new_labels), 0), (0, -5), xycoords='axes fraction', textcoords='offset points',
-                     va='top',
-                     ha='center')
+        host.annotate(label, ((position + 0.5) / len(new_labels), 0), (0, -5), xycoords='axes fraction',
+                      textcoords='offset points',
+                      va='top',
+                      ha='center')
 
     host.legend(loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.12))
 
