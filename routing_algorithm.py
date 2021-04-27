@@ -393,7 +393,7 @@ def routing_algorithm(world, robots, mode="random", maximumSeconds=120):
             for n in range(1, N):
                 x[i].append(cp.Variable((len(demand), 1), boolean=True))
                 current_costs.append(cp.sum(cp.multiply(cp.pos(x[i][n - 1] + cp.transpose(x[i][n]) - 1), time_matrix)))
-                constraints.append(cp.sum(x[i][n]) == cp.sum(x[i][0]))
+                constraints.append(cp.sum(x[i][n]) <= cp.sum(x[i][n-1]))
 
             # Add the capacities constraints
             constraints.append(cp.sum(capacities[i], axis=0) <= robot.capacity)  # Make sure we are not over capacity
@@ -409,7 +409,7 @@ def routing_algorithm(world, robots, mode="random", maximumSeconds=120):
         costs = cp.max(cp.hstack(costs)) + cp.sum(cp.multiply(cp.pos(demand - sum(capacities)), priority))
         objective = cp.Minimize(costs)
         problem = cp.Problem(objective, constraints)
-        problem.solve(verbose=True, solver=cp.CBC, logLevel=1, numberThreads=4, maximumSeconds=60, allowablePercentageGap=5)
+        problem.solve(verbose=True, solver=cp.CBC, logLevel=1, numberThreads=4, maximumSeconds=120, allowablePercentageGap=5)
 
         # Assign the results to the robots and evaluate the costs
         for robot_i, robot in enumerate(x):
