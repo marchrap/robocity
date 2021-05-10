@@ -13,7 +13,7 @@ timestr = time.strftime("%Y%m%d-%H%M%S")
 
 if __name__ == "__main__":
     robots = []
-    world = World()
+    world = World(max_demand=30)
 
     for i in range(10):
         robot = Robot(np.array([0, 0]), i, robot_type=robot_types[i])

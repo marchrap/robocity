@@ -1,7 +1,7 @@
 from world import World
 from robot_config import Robot
 from routing_algorithm import route, route_multiple
-from animate_robots import animate_robots
+from animate_robots import animate_robots, progress_bar
 import ffmpeg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,12 +22,12 @@ routing_mode options:
 "home"
 """
 
-routing_mode = "hungarian"
+routing_mode = "linear_joined_tasks"
 number_of_runs = 200
 
 
 # time-step for euler integration plotting
-dt = 20
+dt = 5
 
 if __name__ == "__main__":
     # Initialize the world
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("\n\t Running in", routing_mode, "routing mode with", number_of_robots, "robots.")
 
     print("\n\t Initialising world...")
-    world = World(number_of_hospitals=15, max_demand=3)
+    world = World(number_of_hospitals=15, max_demand=20)
 
     # Initialize the robots in random warehouses
     robots = []
@@ -72,11 +72,13 @@ if __name__ == "__main__":
     print("\n\t Plotting graphs...")
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_facecolor('black')
-    world.plot(ax=ax, show=False)
-    print("\n\t Calculating animation...")
+    world.plot(ax=ax, show=False, annotate=True)
 
+    print("\n\t Calculating animation...")
     ani = animate_robots(world, robots, fig, ax, dt)
     ax.legend()
+
+    routing_mode = "Binary"
 
     plt.annotate("Routing method: %s" % routing_mode, xy=(0.05, 0.95), xycoords='axes fraction',
                  backgroundcolor='white')
@@ -85,7 +87,7 @@ if __name__ == "__main__":
     plt.annotate("Computation time: %.2f ms" % (computation_time*1000), xy=(0.05, 0.85), xycoords='axes fraction',
                  backgroundcolor='white')
 
-    plt.tight_layout()
+    #plt.tight_layout()
 
     print("\n\t Robots routed with assignment_cost of:", assignment_cost)
     print("\n\t Robots routed with total computation time of:", computation_time)
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     mpl.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\maxw\\PycharmProjects\\4I15 MRS Robocity\\ffmpeg-4.4' \
                                             r'-full_build\\bin\\ffmpeg.exe '
 
-    #render = ani.save("animation%s.mp4" % timestr, fps=150, progress_callback=progress_bar)
+    render = ani.save("animation%s.gif" % timestr, fps=300, progress_callback=progress_bar)
 
     plt.show()
 

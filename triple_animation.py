@@ -7,26 +7,26 @@ import numpy as np
 import matplotlib as mpl
 import time
 
-routing_modes = ["random",
+routing_modes = [#"random",
                  "hungarian",
                  #"linear_separate_tasks",
                  "linear_joined_tasks",
                  #"tsm",
                  #"home"
-                 #"imported"
+                 "imported"
                  ]
 
-labels = ["Random",
+labels = [#"Random",
           "Hungarian",
           #"Separate",
           "Binary",
-          #"mStep"
+          "mStep"
           ]
 
 robot_types = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
 import_file = "robot_path20210415-100223.txt"
 
-dt = 30
+dt = 5
 
 if __name__ == "__main__":
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     for index, routing_mode in enumerate(routing_modes):
 
         robots = []
-        world = World(max_demand=20)
+        world = World(max_demand=3)
 
         for i in range(10):
             robot = Robot(np.array([0, 0]), i, robot_type=robot_types[i])
@@ -114,6 +114,6 @@ if __name__ == "__main__":
     fig.subplots_adjust(bottom=0.1)
 
     print("Saving render...")
-    render = ani.save("animation%s.mp4" % timestr, fps=100, progress_callback=progress_bar)
+    render = ani.save("animation%s.gif" % timestr, fps=150, progress_callback=progress_bar)
 
     plt.show()

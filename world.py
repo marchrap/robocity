@@ -70,7 +70,7 @@ class World:
             pointer = self.graph.edges[edge]
             pointer['travel_time'] *= 1.0
 
-    def plot(self, ax, show=True):
+    def plot(self, ax, show=True, annotate=True):
         """
         Plots a simple representation of the world. The hospitals are marked in blue, the warehouses in green.
         """
@@ -97,9 +97,10 @@ class World:
             pointer = self.graph.nodes[node]
 
             print(pointer['x'], pointer['y'])
-            ax.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",
-                        xy=(pointer['x'] + 100, pointer['y'] - 20), color='black',
-                        bbox=dict(facecolor='white', alpha=0.75, edgecolor='white'))
+            if annotate==True:
+                ax.annotate(f"{pointer['init_demand1']}/{pointer['init_demand2']}"f"/{pointer['priority']}",
+                            xy=(pointer['x'] + 100, pointer['y'] - 20), color='black',
+                            bbox=dict(facecolor='white', alpha=0.75, edgecolor='white'))
 
             # Show the plot if required
         if show:
